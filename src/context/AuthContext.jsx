@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
     accessToken: localStorage.getItem("accessToken") || null,
     user: null,
     role: null,
+    token_expiry: null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }) => {
         accessToken,
         user: decoded.UserInfo.email,
         role: decoded.UserInfo.role,
+        token_expiry: decoded.exp,
       });
       localStorage.setItem("accessToken", accessToken);
     } catch (error) {
@@ -55,6 +57,7 @@ export const AuthProvider = ({ children }) => {
         accessToken,
         user: decoded.UserInfo.email,
         role: decoded.UserInfo.role,
+        token_expiry: decoded.exp,
       }));
       localStorage.setItem("accessToken", accessToken);
       return accessToken;
@@ -83,6 +86,7 @@ export const AuthProvider = ({ children }) => {
         accessToken: existingToken,
         user: decoded.UserInfo.email,
         role: decoded.UserInfo.role,
+        token_expiry: decoded.exp,
       });
     }
     setLoading(false); // Set loading to false once auth state is set

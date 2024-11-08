@@ -4,14 +4,28 @@ import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 const RequireAuth = ({ allowedRoles, children }) => {
-  const { auth } = useAuth();
+  const { auth, refreshAccessToken } = useAuth();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Wait for the auth state to be initialized
-    setIsLoading(false);
-  }, [auth]);
+    const checkTokenExpiration = async () => {
+      const currentTime = Date.now();
+      const tokenExpiryTime = auth.token_expiry * 1000; // Convert to milliseconds
+
+      if (tokenExpiryTime - currentTime < 5 * 60 * 1000) {
+        // Refresh if within 5 minutes of expiry
+        await refreshAccessToken();
+      }
+      setIsLoading(false);
+    };
+
+    if (auth.accessToken && auth.token_expiry) {
+      checkTokenExpiration();
+    } else {
+      setIsLoading(false); // No token available, finish loading immediately
+    }
+  }, [auth, refreshAccessToken]);
 
   if (isLoading) {
     return <div>Loading...</div>;
