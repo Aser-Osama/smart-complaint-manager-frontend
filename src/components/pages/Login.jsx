@@ -1,7 +1,7 @@
 // src/components/Login.js
 import React, { useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
-import useAuth from "../hooks/useAuth";
+import useAuth from "../../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 const Login = () => {
   const { login } = useAuth();

@@ -1,12 +1,38 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
-import useAuth from "../hooks/useAuth"; // Import the hook
+import NavDropdown from "react-bootstrap/NavDropdown";
+import useAuth from "../hooks/useAuth";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const NavBar = () => {
-  const { auth } = useAuth(); // Destructure auth from context
+  const { auth } = useAuth();
+  const axiosPrivate = useAxiosPrivate();
 
-  // If auth is undefined or if there’s no access token, render a loading message or null
+  const [contractType, setContractType] = useState("all");
+  const [contractTypeList, setContractTypeList] = useState([]);
+
+  const fetchContractTypes = async () => {
+    try {
+      const response = await axiosPrivate.get("/schema/types");
+      const responseData = [{ contract_type: "All" }, ...response.data];
+
+      const types = responseData.map((type, index) => ({
+        id: index + 1,
+        name: type.contract_type.replace(/^./, (str) => str.toUpperCase()),
+        linkTo: `/contracts/${type.contract_type}`,
+      }));
+      setContractTypeList(types);
+      setContractType("all");
+    } catch (error) {
+      console.error("Failed to fetch contract types", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchContractTypes();
+  }, []);
+
   if (!auth || !auth.accessToken) {
     return null;
   }
@@ -15,34 +41,39 @@ const NavBar = () => {
     <Navbar bg="light" expand="lg">
       <Container>
         <Navbar.Brand as={Link} to="/">
-          MyApp, {auth.user ? `Welcome, ${auth.role}` : "Please Login"}
+          Smart Complaint System
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            {auth.accessToken && (
-              <>
-                <Nav.Link as={NavLink} to="/" end>
-                  Home
-                </Nav.Link>
-                {auth.role === "admin" && (
-                  <Nav.Link as={NavLink} to="/admin">
-                    Admin
-                  </Nav.Link>
-                )}
-              </>
+            <Nav.Link as={NavLink} to="/" end>
+              Home
+            </Nav.Link>
+            {auth.role === "admin" && (
+              <Nav.Link as={NavLink} to="/admin">
+                Admin
+              </Nav.Link>
             )}
+            <NavDropdown title="Filter Contract Type" id="basic-nav-dropdown">
+              {contractTypeList.map((contractTypeItem) => (
+                <NavDropdown.Item
+                  key={contractTypeItem.id}
+                  as={NavLink}
+                  to={`${contractTypeItem.linkTo}`}
+                  active={contractType === contractTypeItem.name.toLowerCase()}
+                  onClick={() =>
+                    setContractType(contractTypeItem.name.toLowerCase())
+                  }
+                >
+                  {contractTypeItem.name}
+                </NavDropdown.Item>
+              ))}
+            </NavDropdown>
           </Nav>
           <Nav>
-            {auth.accessToken ? (
-              <Nav.Link as={NavLink} to="/logout">
-                Logout
-              </Nav.Link>
-            ) : (
-              <Nav.Link as={NavLink} to="/login">
-                Login
-              </Nav.Link>
-            )}
+            <Nav.Link as={NavLink} to="/logout">
+              Logout
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>

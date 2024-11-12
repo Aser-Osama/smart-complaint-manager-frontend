@@ -1,17 +1,18 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Outlet } from "react-router-dom";
-import { Container } from "react-bootstrap";
-import NavBar from "./components/NavBar"; // Now it matches the component name
+import { Container, Row } from "react-bootstrap";
+import NavBar from "./components/Navbar"; // Now it matches the component name
 
 function App() {
   return (
-    <>
-      <NavBar /> {/* Navbar should be persistent */}
-      <Container className="container-xl p-3">
-        <Outlet /> {/* Routed content will appear here */}
-      </Container>
-    </>
+    <div>
+      <NavBar />
+      <div className="d-flex justify-content-center align-items-start vh-100 mt-0">
+        <Container fluid={true} className="px-5 mx-5">
+          <Outlet />
+        </Container>
+      </div>
+    </div>
   );
 }
-
 export default App;

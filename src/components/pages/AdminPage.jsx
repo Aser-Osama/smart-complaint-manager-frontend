@@ -1,6 +1,6 @@
 // src/components/AdminPage.js
 import React, { useEffect, useState } from "react";
-import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 
 const AdminPage = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -20,7 +20,7 @@ const AdminPage = () => {
   }, [axiosPrivate]);
 
   return (
-    <div className="container mt-5">
+    <div className="container-fluid mt-5">
       <h2>Admin Page</h2>
       <p>This page is only accessible by admin users.</p>
       {data ? (
