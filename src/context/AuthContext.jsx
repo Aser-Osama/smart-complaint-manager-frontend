@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
     accessToken: localStorage.getItem("accessToken") || null,
     user: null,
     role: null,
+    id: null,
     token_expiry: null,
   });
   const [loading, setLoading] = useState(true);
@@ -36,6 +37,7 @@ export const AuthProvider = ({ children }) => {
         accessToken,
         user: decoded.UserInfo.email,
         role: decoded.UserInfo.role,
+        id: decoded.UserInfo.id,
         token_expiry: decoded.exp,
       });
       localStorage.setItem("accessToken", accessToken);
@@ -57,6 +59,7 @@ export const AuthProvider = ({ children }) => {
         accessToken,
         user: decoded.UserInfo.email,
         role: decoded.UserInfo.role,
+        id: decoded.UserInfo.id,
         token_expiry: decoded.exp,
       }));
       localStorage.setItem("accessToken", accessToken);
@@ -86,6 +89,7 @@ export const AuthProvider = ({ children }) => {
         accessToken: existingToken,
         user: decoded.UserInfo.email,
         role: decoded.UserInfo.role,
+        id: decoded.UserInfo.id,
         token_expiry: decoded.exp,
       });
     }

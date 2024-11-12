@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from "react";
 import ContractsTable from "../ContractsTable";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { Col, Container, Row } from "react-bootstrap";
 
 const Home = () => {
   const [contracts, setContracts] = useState([]);
@@ -30,10 +31,27 @@ const Home = () => {
   }, [params.filter]);
 
   return (
-    <div className="container-fluid mt-5">
-      <h1>All Contracts</h1>
-      <ContractsTable contracts={contracts} />
-    </div>
+    <Container fluid="xxl">
+      <Row>
+        <h1>
+          {params.filter && params.filter.toLowerCase() !== "all"
+            ? `Contracts of type ${
+                params.filter.charAt(0).toUpperCase() + params.filter.slice(1)
+              }`
+            : "All Contracts"}
+        </h1>
+      </Row>
+      <Row>
+        <ContractsTable contracts={contracts} />
+      </Row>
+      <Row className="text-end">
+        <Col>
+          <Link to="/createcontract" className="btn btn-primary">
+            Create Contract
+          </Link>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 
