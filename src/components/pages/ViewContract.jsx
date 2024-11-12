@@ -10,7 +10,7 @@ const ViewContract = () => {
   const [receipts, setReceipts] = useState(null);
   const [id, setId] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
-
+  const [error, setError] = useState(null);
   // Get the URL parameters and validate them
   const params = useParams();
   if (!params.id || isNaN(params.id)) {
@@ -27,22 +27,28 @@ const ViewContract = () => {
           )
         ).data;
         setReceipts(receiptsResponse);
+
         //console.log("Contracts data fetched:", contractsResponse);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        if (error.response && error.response.status === 404) {
+          setError(new Error(error.response.data.message));
+        } else {
+          console.error("Error fetching data:", error);
+          setError(error);
+        }
       }
     };
     const fetchPdf = async () => {
       try {
-        const response = await fetch(
-          `http://0.0.0.0:8080/www.irs.gov/pub/irs-pdf/f1040.pdf`
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+        const response = await AxiosPrivate.get(`/contract/file/${params.id}`, {
+          responseType: "blob",
+        });
+        if (response.status === 200) {
+          const url = URL.createObjectURL(response.data);
+          setPdfUrl(url);
+        } else {
+          console.error("Error fetching PDF:", response.data.message);
         }
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setPdfUrl(url);
       } catch (error) {
         console.error("Error fetching PDF:", error.message);
       }
@@ -56,7 +62,7 @@ const ViewContract = () => {
   console.log(params);
 
   return (
-    receipts && (
+    (receipts && (
       <Container className="mt-5" fluid={true}>
         <Row>
           <h1>
@@ -78,9 +84,6 @@ const ViewContract = () => {
                 </NavLink>
               </Col>
               <Col className="ms-auto me-0 text-end">
-                {/* <NavLink to={`/edit/contract/${id}`} className="me-2">
-                  <button className="btn btn-secondary">Edit Contract</button>
-                </NavLink> */}
                 <NavLink to={`/upload/id/${id}`}>
                   <button className="btn btn-primary">Upload Receipt(s)</button>
                 </NavLink>
@@ -112,7 +115,27 @@ const ViewContract = () => {
           </Col>
         </Row>
       </Container>
-    )
+    )) ||
+    (error && (
+      <Container>
+        <Row className="py-5">
+          <h1 className="text-danger">Error fetching data</h1>
+          <h5>{error.message}</h5>
+        </Row>
+        <Row>
+          <Col className="me-auto">
+            <NavLink to="/">
+              <button className="btn btn-danger">Back to Contracts</button>
+            </NavLink>
+          </Col>
+          <Col className="ms-auto me-0 text-end">
+            <NavLink to={`/upload/id/${id}`}>
+              <button className="btn btn-primary">Upload Receipt(s)</button>
+            </NavLink>
+          </Col>
+        </Row>
+      </Container>
+    )) || <p>Loading data...</p>
   );
 };
 

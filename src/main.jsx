@@ -11,6 +11,7 @@ import ViewContract from "./components/pages/ViewContract";
 import ViewReceipt from "./components/pages/ViewReceipt";
 import { AuthProvider } from "./context/AuthContext";
 import React from "react";
+import DownloadPage from "./components/DownloadFile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -60,6 +61,22 @@ const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <ViewReceipt />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/receipt/download/:id",
+        element: (
+          <RequireAuth>
+            <DownloadPage downloadType="receipt" />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/contract/download/:id",
+        element: (
+          <RequireAuth>
+            <DownloadPage downloadType="contract" />
           </RequireAuth>
         ),
       },

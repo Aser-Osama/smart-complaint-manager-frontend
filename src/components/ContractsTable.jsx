@@ -109,6 +109,8 @@ function ContractsTable({ contracts }) {
                 <NavLink
                   to={`/contract/download/${contract.id}`}
                   className="text-decoration-none"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Download PDF
                 </NavLink>

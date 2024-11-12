@@ -38,15 +38,15 @@ const ViewReceipt = () => {
 
     const fetchPdf = async () => {
       try {
-        const response = await fetch(
-          `http://0.0.0.0:8080/www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf`
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+        const response = await AxiosPrivate.get(`/receipt/file/${params.id}`, {
+          responseType: "blob",
+        });
+        if (response.status === 200) {
+          const url = URL.createObjectURL(response.data);
+          setPdfUrl(url);
+        } else {
+          console.error("Error fetching PDF:", response.data.message);
         }
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setPdfUrl(url);
       } catch (error) {
         console.error("Error fetching PDF:", error.message);
       }

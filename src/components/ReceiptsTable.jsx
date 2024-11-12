@@ -108,8 +108,10 @@ function ReceiptTable({ receipts }) {
               </td>
               <td>
                 <NavLink
-                  to={`/api/receipt/download/${receipt.id}`}
+                  to={`/receipt/download/${receipt.id}`}
                   className="text-decoration-none"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Download PDF
                 </NavLink>
