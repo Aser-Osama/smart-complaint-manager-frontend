@@ -38,6 +38,7 @@ const CreateContract = () => {
     try {
       const response = await axiosPrivate.get(`/schema/types/${type}`); // Get schema by type
       setSchemaFields(response.data); // Set fields only for selected schema type
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching schema fields:", error);
     }

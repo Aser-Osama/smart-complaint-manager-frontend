@@ -2,12 +2,19 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import Table from "react-bootstrap/Table";
 import FormControl from "react-bootstrap/FormControl";
+import { Button, Modal } from "react-bootstrap";
 
 function ReceiptTable({ receipts }) {
   if (!receipts.length) return <p>No receipts found...</p>;
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState(null);
+  const [showMismatch, setShowMismatch] = useState(false);
+  const [mismatchedColumns, setMismatchedColumns] = useState([]);
 
+  const handleShowMismatch = (data) => {
+    setShowMismatch(true);
+    setMismatchedColumns(data);
+  };
   const sortedReceipts = [...receipts].sort((a, b) => {
     if (sortConfig) {
       const { key, direction } = sortConfig;
@@ -42,6 +49,20 @@ function ReceiptTable({ receipts }) {
 
   return (
     <div>
+      <Modal show={showMismatch} onHide={() => setShowMismatch(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Mismatched Columns for receipt {mismatchedColumns.id}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{mismatchedColumns.data}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowMismatch(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <FormControl
         type="text"
         placeholder="Search by receipt ID"
@@ -87,17 +108,43 @@ function ReceiptTable({ receipts }) {
                 {getSortIcon("upload_date")}
               </span>
             </th>
+            <th>Has Mismatch</th>
             <th>Details</th>
             <th>Download</th>
           </tr>
         </thead>
         <tbody>
           {filteredReceipts.map((receipt) => (
-            <tr key={receipt.id}>
+            <tr
+              key={receipt.id}
+              style={{
+                backgroundColor:
+                  receipt?.mismatched_columns?.col?.length > 0
+                    ? "#f8d7da"
+                    : "#ffffff", // Ensure valid hex color for fallback
+              }}
+            >
               <td>{receipt.id}</td>
               <td>{receipt.contract_id}</td>
               <td>{receipt.uploader}</td>
               <td>{new Date(receipt.upload_date).toLocaleDateString()}</td>
+              <td>
+                {receipt.has_mismatch && (
+                  <>
+                    <a
+                      href="#"
+                      onClick={() =>
+                        handleShowMismatch({
+                          id: receipt.id,
+                          data: receipt?.mismatched_columns?.col?.join(", "),
+                        })
+                      }
+                    >
+                      View Mismatch
+                    </a>
+                  </>
+                )}
+              </td>
               <td>
                 <NavLink
                   to={`/receipt/${receipt.id}`}

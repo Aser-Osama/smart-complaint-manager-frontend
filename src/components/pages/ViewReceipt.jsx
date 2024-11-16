@@ -9,8 +9,10 @@ const ViewReceipt = () => {
   const [receipt, setReceipt] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [contractId, setContractId] = useState(null);
+  const [contract, setContract] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
-
+  const [error, setError] = useState(null);
+  const [mismatchedCols, setMismatchedCols] = useState([]);
   const params = useParams();
   const AxiosPrivate = useAxiosPrivate();
 
@@ -26,6 +28,22 @@ const ViewReceipt = () => {
         ).data;
         setReceipt(receiptResponse);
         setContractId(receiptResponse.contract_id);
+
+        const contractResponse = (
+          await AxiosPrivate.get(`/contract/id/${receiptResponse.contract_id}`)
+        ).data;
+
+        const transformedContractData = contractResponse.data.reduce(
+          (acc, data) => {
+            acc[data.key] = data.value;
+            return acc;
+          },
+          {}
+        );
+
+        console.log(transformedContractData);
+
+        setContract(transformedContractData);
 
         const schemaResponse = (
           await AxiosPrivate.get(`/receipt/schema/${params.id}`)
@@ -51,9 +69,24 @@ const ViewReceipt = () => {
         console.error("Error fetching PDF:", error.message);
       }
     };
+    const fetchMismatch = async () => {
+      try {
+        const response = await AxiosPrivate.post(`/receipt/getmismatchedcols`, {
+          receipt_id: params.id,
+        });
+        if (response.status === 200) {
+          setMismatchedCols(response.data[0].col);
+        } else {
+          console.error(error);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
     fetchSchemaAndReceipt();
     fetchPdf();
+    fetchMismatch();
   }, [params.id, AxiosPrivate]);
 
   const handleSave = async (updatedData) => {
@@ -63,7 +96,11 @@ const ViewReceipt = () => {
       setReceipt(updatedData);
       setIsEditing(false);
     } catch (error) {
-      console.error("Error saving data:", error);
+      console.error("Error saving data:", error.response.data);
+      console.log(updatedData);
+      setError(
+        `Error saving data ${error.response.data.message} : ${error.response.data.errors}`
+      );
     }
   };
 
@@ -91,6 +128,19 @@ const ViewReceipt = () => {
               onEdit={handleEdit}
               onSave={handleSave}
             />
+            {error && <p className="text-danger">{error}</p>}
+          </Row>
+          <Row>
+            <h4>Mismatched Columns and their contract data:</h4>
+            <Col>
+              <ul>
+                {mismatchedCols.map((col, index) => (
+                  <li key={index}>
+                    {col} : {contract[col]}
+                  </li>
+                ))}
+              </ul>
+            </Col>
           </Row>
           <Row>
             <Col className="me-auto">

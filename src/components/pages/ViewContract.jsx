@@ -2,6 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { FaSync } from "react-icons/fa";
+import EditableReceiptTable from "../ReceiptDataTable";
 
 import {
   Button,
@@ -24,11 +25,46 @@ const ViewContract = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState(null);
   const [showToast, setShowToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [showContractData, setShowContractData] = useState(false);
+  const [contractData, setContractData] = useState(null);
+  const [schema, setSchema] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+
   // Get the URL parameters and validate them
   const params = useParams();
   if (!params.id || isNaN(params.id)) {
     return <p>Invalid contract number...</p>;
   }
+
+  const handleEdit = () => setIsEditing(true);
+
+  const handleSave = async (updatedData) => {
+    try {
+      console.log("Saving data:", updatedData);
+      await AxiosPrivate.patch(`/contract`, updatedData);
+      setContractData(updatedData);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
+  };
+
+  const fetchSchemaAndContract = async () => {
+    try {
+      const response = await AxiosPrivate.get(`/contract/id/${id}`);
+      setContractData(response.data);
+      setShowContractData(true);
+
+      const schemaResponse = (
+        await AxiosPrivate.get(`/receipt/schema/${params.id}`)
+      ).data;
+      setSchema(schemaResponse);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   const handleFileUpload = async () => {
     if (!selectedFiles) {
       setShowModal(false);
@@ -54,13 +90,16 @@ const ViewContract = () => {
         setShowToast(true); // Show the toast notification
       } else {
         console.error("Error uploading files:", response.data.message);
+        setShowErrorToast(true);
       }
     } catch (error) {
       console.error("Error uploading files:", error.message);
+      setShowErrorToast(true);
     } finally {
       setShowModal(false);
     }
   };
+
   const fetchReceipts = async () => {
     try {
       // Fetch the schema
@@ -68,7 +107,6 @@ const ViewContract = () => {
         await AxiosPrivate.get(`/receipt/contractid/${Number(params.id) ?? 0}`)
       ).data;
       setReceipts(receiptsResponse);
-
       //console.log("Contracts data fetched:", contractsResponse);
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -141,6 +179,25 @@ const ViewContract = () => {
               </Toast.Body>
             </Toast>
           </ToastContainer>
+          <ToastContainer position="top-end" className="p-3">
+            <Toast
+              onClose={() => setShowErrorToast(false)}
+              show={showErrorToast}
+              delay={5000}
+              autohide
+            >
+              <Toast.Header>
+                <strong className="me-auto">File Uploading Error</strong>
+              </Toast.Header>
+              <Toast.Body>
+                <h6>Error Uploading Files.</h6>
+                <p>
+                  An error has occured while attempting to upload the files.
+                  Ensure your files are in PDF format and under 25mbs in size.
+                </p>
+              </Toast.Body>
+            </Toast>
+          </ToastContainer>
           <Col md={8}>
             <Row style={{ maxHeight: "600px", overflowY: "auto" }}>
               <ReceiptTable receipts={receipts} />
@@ -183,6 +240,33 @@ const ViewContract = () => {
                     </Button>
                   </Modal.Footer>
                 </Modal>
+
+                <Modal
+                  show={showContractData}
+                  onHide={() => setShowContractData(false)}
+                >
+                  <Modal.Header closeButton>
+                    <Modal.Title>Contract Data</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    <EditableReceiptTable
+                      receipt={contractData}
+                      schema={schema}
+                      isEditing={isEditing}
+                      onEdit={handleEdit}
+                      onSave={handleSave}
+                    />
+                    {/* <pre>{JSON.stringify(contractData, null, 2)}</pre> */}
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button
+                      variant="secondary"
+                      onClick={() => setShowContractData(false)}
+                    >
+                      Close
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
               </Col>
             </Row>
           </Col>
@@ -198,6 +282,15 @@ const ViewContract = () => {
                   />
                 </Row>
                 <Row className="text-end pt-1">
+                  <Col className="me-auto text-start">
+                    <a
+                      href="#"
+                      className=" text-start"
+                      onClick={() => fetchSchemaAndContract()}
+                    >
+                      Stored Contract Details
+                    </a>
+                  </Col>
                   <Col>
                     <a href={pdfUrl} download={`contract_${params.id}.pdf`}>
                       Download PDF
@@ -206,7 +299,25 @@ const ViewContract = () => {
                 </Row>
               </>
             ) : (
-              <p>Loading PDF...</p>
+              <>
+                <p>Loading PDF...</p>
+                <Row className="text-end pt-1">
+                  <Col className="me-auto text-start">
+                    <a
+                      href="#"
+                      className=" text-start"
+                      onClick={() => fetchSchemaAndContract()}
+                    >
+                      Stored Contract Details
+                    </a>
+                  </Col>
+                  <Col>
+                    <a href={pdfUrl} download={`contract_${params.id}.pdf`}>
+                      Download PDF
+                    </a>
+                  </Col>
+                </Row>
+              </>
             )}
           </Col>
         </Row>
@@ -214,6 +325,26 @@ const ViewContract = () => {
     )) ||
     (error && (
       <Container>
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Upload Receipt(s)</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <input
+              type="file"
+              multiple
+              onChange={(e) => setSelectedFiles(e.target.files)}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleFileUpload}>
+              Submit
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <Row className="py-5">
           <h1 className="text-danger">Error fetching data</h1>
           <h5>{error.message}</h5>
@@ -225,9 +356,12 @@ const ViewContract = () => {
             </NavLink>
           </Col>
           <Col className="ms-auto me-0 text-end">
-            <NavLink to={`/upload/id/${id}`}>
-              <button className="btn btn-primary">Upload Receipt(s)</button>
-            </NavLink>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowModal(true)}
+            >
+              Upload Receipt(s)
+            </button>
           </Col>
         </Row>
       </Container>
