@@ -16,6 +16,13 @@ const ViewReceipt = () => {
   const params = useParams();
   const AxiosPrivate = useAxiosPrivate();
 
+  //Update Use Effect
+  useEffect(() => {
+    // This effect will run whenever mismatchedCols changes
+    console.log("mismatchedCols updated:", mismatchedCols);
+  }, [mismatchedCols]);
+
+  // Mount Use Effect
   useEffect(() => {
     if (!params.id || isNaN(params.id)) {
       return;
@@ -29,6 +36,7 @@ const ViewReceipt = () => {
         setReceipt(receiptResponse);
         setContractId(receiptResponse.contract_id);
 
+        setMismatchedCols(receiptResponse.mismatched_columns.col ?? []);
         const contractResponse = (
           await AxiosPrivate.get(`/contract/id/${receiptResponse.contract_id}`)
         ).data;
@@ -40,9 +48,6 @@ const ViewReceipt = () => {
           },
           {}
         );
-
-        console.log(transformedContractData);
-
         setContract(transformedContractData);
 
         const schemaResponse = (
@@ -69,31 +74,30 @@ const ViewReceipt = () => {
         console.error("Error fetching PDF:", error.message);
       }
     };
-    const fetchMismatch = async () => {
-      try {
-        const response = await AxiosPrivate.post(`/receipt/getmismatchedcols`, {
-          receipt_id: params.id,
-        });
-        if (response.status === 200) {
-          setMismatchedCols(response.data[0].col);
-        } else {
-          console.error(error);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
 
     fetchSchemaAndReceipt();
     fetchPdf();
-    fetchMismatch();
-  }, [params.id, AxiosPrivate]);
-
+  }, [params.id]);
+  const fetchMismatch = async () => {
+    try {
+      const response = await AxiosPrivate.post(`/receipt/getmismatchedcols`, {
+        receipt_id: params.id,
+      });
+      if (response.status === 200) {
+        setMismatchedCols(response.data[0].col);
+      } else {
+        console.error(error);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleSave = async (updatedData) => {
     try {
       console.log("Saving data:", updatedData);
       await AxiosPrivate.patch(`/receipt`, updatedData);
       setReceipt(updatedData);
+      await fetchMismatch();
       setIsEditing(false);
     } catch (error) {
       console.error("Error saving data:", error.response.data);

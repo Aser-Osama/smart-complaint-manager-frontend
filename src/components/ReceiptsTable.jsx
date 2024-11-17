@@ -4,7 +4,7 @@ import Table from "react-bootstrap/Table";
 import FormControl from "react-bootstrap/FormControl";
 import { Button, Modal } from "react-bootstrap";
 
-function ReceiptTable({ receipts }) {
+function ReceiptTable({ receipts, pageNum, pageSize }) {
   if (!receipts.length) return <p>No receipts found...</p>;
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState(null);
@@ -114,9 +114,9 @@ function ReceiptTable({ receipts }) {
           </tr>
         </thead>
         <tbody>
-          {filteredReceipts.map((receipt) => (
+          {filteredReceipts.map((receipt, index) => (
             <tr
-              key={receipt.id}
+              key={index}
               style={{
                 backgroundColor:
                   receipt?.mismatched_columns?.col?.length > 0

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { FaSync } from "react-icons/fa";
 import EditableReceiptTable from "../ReceiptDataTable";
-
+import Pagination from "../Pagination.jsx";
 import {
   Button,
   Col,
@@ -30,6 +30,10 @@ const ViewContract = () => {
   const [contractData, setContractData] = useState(null);
   const [schema, setSchema] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   // Get the URL parameters and validate them
   const params = useParams();
@@ -102,11 +106,19 @@ const ViewContract = () => {
 
   const fetchReceipts = async () => {
     try {
+      setReceipts([]);
       // Fetch the schema
       const receiptsResponse = (
-        await AxiosPrivate.get(`/receipt/contractid/${Number(params.id) ?? 0}`)
+        await AxiosPrivate.get(
+          `/receipt/contractid/${
+            Number(params.id) ?? 0
+          }?page=${pageNumber}&pageSize=${pageSize}`
+        )
       ).data;
       setReceipts(receiptsResponse);
+      setReceipts(receiptsResponse.data);
+      setTotalItems(receiptsResponse.metadata.totalItems);
+      setTotalPages(receiptsResponse.metadata.totalPages);
       //console.log("Contracts data fetched:", contractsResponse);
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -139,7 +151,11 @@ const ViewContract = () => {
     fetchPdf();
   }, [params.id]);
 
-  console.log(params);
+  // onChange Use Effect
+  useEffect(() => {
+    setId(params.id);
+    fetchReceipts();
+  }, [pageNumber, pageSize]);
 
   return (
     (receipts && (
@@ -202,7 +218,16 @@ const ViewContract = () => {
             <Row style={{ maxHeight: "600px", overflowY: "auto" }}>
               <ReceiptTable receipts={receipts} />
             </Row>
-
+            <Row className="mb-2">
+              <Pagination
+                currentPage={pageNumber}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setPageNumber}
+                onPageSizeChange={setPageSize}
+              />
+            </Row>
             <Row>
               <Col className="me-auto">
                 <NavLink to="/">
@@ -277,7 +302,7 @@ const ViewContract = () => {
                   <iframe
                     src={pdfUrl}
                     width="100%"
-                    height="600px"
+                    height="700px"
                     title="PDF Viewer"
                   />
                 </Row>
@@ -346,6 +371,13 @@ const ViewContract = () => {
           </Modal.Footer>
         </Modal>
         <Row className="py-5">
+          <Col xxl="auto" className="border-end border-2 ">
+            <FaSync
+              onClick={fetchReceipts}
+              style={{ cursor: "pointer" }}
+              size={20}
+            />
+          </Col>
           <h1 className="text-danger">Error fetching data</h1>
           <h5>{error.message}</h5>
         </Row>

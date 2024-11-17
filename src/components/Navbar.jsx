@@ -49,11 +49,6 @@ const NavBar = () => {
             <Nav.Link as={NavLink} to="/" end>
               Home
             </Nav.Link>
-            {auth.role === "admin" && (
-              <Nav.Link as={NavLink} to="/admin">
-                Admin
-              </Nav.Link>
-            )}
             <NavDropdown title="Filter Contract Type" id="basic-nav-dropdown">
               {contractTypeList.map((contractTypeItem) => (
                 <NavDropdown.Item
