@@ -61,9 +61,17 @@ const ViewContract = () => {
       setShowContractData(true);
 
       const schemaResponse = (
-        await AxiosPrivate.get(`/receipt/schema/${params.id}`)
+        await AxiosPrivate.get(`/schema/types/${response.data.contract_type}`)
       ).data;
-      setSchema(schemaResponse);
+
+      const schemaResponseAdjustedNaming = schemaResponse.map((item) => {
+        return {
+          key: item.key_name,
+          value_type: item.value_type,
+        };
+      });
+      console.log("Schema data fetched:", schemaResponseAdjustedNaming);
+      setSchema(schemaResponseAdjustedNaming);
     } catch (error) {
       console.error("Error fetching data:", error);
     }

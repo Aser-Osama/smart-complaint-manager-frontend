@@ -36,7 +36,7 @@ const ViewReceipt = () => {
         setReceipt(receiptResponse);
         setContractId(receiptResponse.contract_id);
 
-        setMismatchedCols(receiptResponse.mismatched_columns.col ?? []);
+        setMismatchedCols(receiptResponse?.mismatched_columns?.col ?? []);
         const contractResponse = (
           await AxiosPrivate.get(`/contract/id/${receiptResponse.contract_id}`)
         ).data;
@@ -135,7 +135,9 @@ const ViewReceipt = () => {
             {error && <p className="text-danger">{error}</p>}
           </Row>
           <Row>
-            <h4>Mismatched Columns and their contract data:</h4>
+            {mismatchedCols.length !== 0 && (
+              <h4>Mismatched Columns and their contract data:</h4>
+            )}
             <Col>
               <ul>
                 {mismatchedCols.map((col, index) => (
