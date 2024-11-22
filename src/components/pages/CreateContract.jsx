@@ -7,6 +7,7 @@ const CreateContract = () => {
   const [file, setFile] = useState(null);
   const [uploader, setUploader] = useState("");
   const [contractType, setContractType] = useState("");
+  const [contract_name, setContractName] = useState("");
   const [contractTypes, setContractTypes] = useState([]); // Store contract types separately
   const [schemaFields, setSchemaFields] = useState([]); // Store fields for selected schema
   const [data, setData] = useState({});
@@ -71,6 +72,7 @@ const CreateContract = () => {
         uploader,
         contract_type: contractType,
         data,
+        contract_name,
       })
     );
 
@@ -110,15 +112,15 @@ const CreateContract = () => {
         <Form.Label>Upload Contract File</Form.Label>
         <Form.Control type="file" onChange={handleFileChange} />
       </Form.Group>
-      {/* <Form.Group controlId="uploader">
-        <Form.Label>Uploader ID</Form.Label>
+      <Form.Group controlId="ContractName">
+        <Form.Label>Contract name</Form.Label>
         <Form.Control
           type="text"
-          placeholder="Enter uploader ID"
-          value={uploader}
-          onChange={(e) => setUploader(e.target.value)}
+          placeholder="Enter Contract Name"
+          value={contract_name}
+          onChange={(e) => setContractName(e.target.value)}
         />
-      </Form.Group> */}
+      </Form.Group>
       <Form.Group controlId="contractType">
         <Form.Label>Contract Type</Form.Label>
         <Form.Control

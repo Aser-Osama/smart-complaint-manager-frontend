@@ -5,7 +5,7 @@ import FormControl from "react-bootstrap/FormControl";
 import { Button, Modal } from "react-bootstrap";
 
 function ReceiptTable({ receipts, pageNum, pageSize }) {
-  if (!receipts.length) return <p>No receipts found...</p>;
+  if (!receipts.length) return <p>No invoices found...</p>;
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState(null);
   const [showMismatch, setShowMismatch] = useState(false);
@@ -52,7 +52,7 @@ function ReceiptTable({ receipts, pageNum, pageSize }) {
       <Modal show={showMismatch} onHide={() => setShowMismatch(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Mismatched Columns for receipt {mismatchedColumns.id}
+            Mismatched Columns for invoice {mismatchedColumns.id}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>{mismatchedColumns.data}</Modal.Body>
@@ -65,7 +65,7 @@ function ReceiptTable({ receipts, pageNum, pageSize }) {
 
       <FormControl
         type="text"
-        placeholder="Search by receipt ID"
+        placeholder="Search by invoice ID"
         className="mb-3"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
@@ -150,7 +150,7 @@ function ReceiptTable({ receipts, pageNum, pageSize }) {
                   to={`/receipt/${receipt.id}`}
                   className="text-decoration-none"
                 >
-                  View Receipt Details
+                  View Invoice Details
                 </NavLink>
               </td>
               <td>

@@ -12,6 +12,7 @@ const ViewReceipt = () => {
   const [contract, setContract] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [error, setError] = useState(null);
+  const [validationErrors, setValidationErrors] = useState(null);
   const [mismatchedCols, setMismatchedCols] = useState([]);
   const params = useParams();
   const AxiosPrivate = useAxiosPrivate();
@@ -84,7 +85,7 @@ const ViewReceipt = () => {
         receipt_id: params.id,
       });
       if (response.status === 200) {
-        setMismatchedCols(response.data[0].col);
+        setMismatchedCols(response?.data[0]?.col ?? []);
       } else {
         console.error(error);
       }
@@ -99,12 +100,10 @@ const ViewReceipt = () => {
       setReceipt(updatedData);
       await fetchMismatch();
       setIsEditing(false);
+      setValidationErrors(null);
     } catch (error) {
-      console.error("Error saving data:", error.response.data);
-      console.log(updatedData);
-      setError(
-        `Error saving data ${error.response.data.message} : ${error.response.data.errors}`
-      );
+      console.error("Error saving data:", error.response.data.errors);
+      setValidationErrors(error.response.data.errors);
     }
   };
 
@@ -119,7 +118,7 @@ const ViewReceipt = () => {
   return (
     <Container className="mt-5" fluid={true}>
       <Row>
-        <h1>Receipt Number: {params.id}</h1>
+        <h1>Invoice Number: {params.id}</h1>
         <h3>for Contract Number: {contractId}</h3>
       </Row>
       <Row>
@@ -135,17 +134,38 @@ const ViewReceipt = () => {
             {error && <p className="text-danger">{error}</p>}
           </Row>
           <Row>
-            {mismatchedCols.length !== 0 && (
-              <h4>Mismatched Columns and their contract data:</h4>
-            )}
             <Col>
-              <ul>
-                {mismatchedCols.map((col, index) => (
-                  <li key={index}>
-                    {col} : {contract[col]}
-                  </li>
-                ))}
-              </ul>
+              {mismatchedCols.length !== 0 && (
+                <h4>Mismatched Columns and their contract data:</h4>
+              )}
+              <Col>
+                <ul>
+                  {mismatchedCols.map((col, index) => (
+                    <li key={index}>
+                      {col} : {contract[col]}
+                    </li>
+                  ))}
+                </ul>
+              </Col>
+            </Col>
+            <Col>
+              {validationErrors && (
+                <>
+                  <h6>Some validation errors occurred:</h6>
+                  <p>
+                    If the element does not exist inside this invoice, use -1 as
+                    a default value for numbers, "01-01-1971" for dates, and
+                    "NA" for strings.
+                  </p>
+                  <ul>
+                    {Object.entries(validationErrors).map(([key, value]) => (
+                      <li key={key}>
+                        {key}: {value}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </Col>
           </Row>
           <Row>

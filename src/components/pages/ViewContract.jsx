@@ -12,6 +12,9 @@ import {
   Row,
   Toast,
   ToastContainer,
+  Form,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "react-bootstrap";
 import ReceiptTable from "../ReceiptsTable.jsx";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate.js";
@@ -34,7 +37,8 @@ const ViewContract = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-
+  const [mismatchOnly, setMismatchOnly] = useState(false);
+  const [contract_name, setContractName] = useState(null);
   // Get the URL parameters and validate them
   const params = useParams();
   if (!params.id || isNaN(params.id)) {
@@ -114,15 +118,16 @@ const ViewContract = () => {
 
   const fetchReceipts = async () => {
     try {
-      setReceipts([]);
+      //setReceipts([]);
       // Fetch the schema
       const receiptsResponse = (
         await AxiosPrivate.get(
           `/receipt/contractid/${
             Number(params.id) ?? 0
-          }?page=${pageNumber}&pageSize=${pageSize}`
+          }?page=${pageNumber}&pageSize=${pageSize}&mismatchOnly=${mismatchOnly}`
         )
       ).data;
+      setContractName(receiptsResponse.contract_name);
       setReceipts(receiptsResponse);
       setReceipts(receiptsResponse.data);
       setTotalItems(receiptsResponse.metadata.totalItems);
@@ -163,24 +168,44 @@ const ViewContract = () => {
   useEffect(() => {
     setId(params.id);
     fetchReceipts();
-  }, [pageNumber, pageSize]);
+  }, [pageNumber, pageSize, mismatchOnly]);
 
   return (
     (receipts && (
       <Container className="m-5" fluid={true}>
         <Row className="align-items-center mb-3">
-          <Col xxl="auto" className="border-end border-2 ">
-            <FaSync
-              onClick={fetchReceipts}
-              style={{ cursor: "pointer" }}
-              size={20}
-            />
-          </Col>
-          <Col>
-            <h1 className="mb-0 ms-0">
-              Contract Number:{" "}
-              {!isNaN(params.id) ? params.id : "Invalid Contract Number"}
-            </h1>
+          <Col xxl="8">
+            <Row className="align-items-center">
+              <Col xxl="auto" className="border-end border-2">
+                <FaSync
+                  onClick={fetchReceipts}
+                  style={{ cursor: "pointer" }}
+                  size={20}
+                />
+              </Col>
+              <Col xxl="10">
+                {contract_name === null ? (
+                  <h1 className="mb-0 ms-0">
+                    Contract Number:{" "}
+                    {!isNaN(params.id) ? params.id : "Invalid Contract Number"}
+                  </h1>
+                ) : (
+                  <h1 className="mb-0 ms-0">Contract Name: {contract_name}</h1>
+                )}
+              </Col>
+              <Col xxl="auto" className="text-end">
+                <ToggleButtonGroup type="checkbox" className="mb-2">
+                  <ToggleButton
+                    id="tbg-check-1"
+                    variant="outline-secondary"
+                    value={0}
+                    onClick={() => setMismatchOnly(!mismatchOnly)}
+                  >
+                    Mismatched Only
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Col>
+            </Row>
           </Col>
         </Row>
         <Row>
@@ -247,12 +272,11 @@ const ViewContract = () => {
                   className="btn btn-secondary"
                   onClick={() => setShowModal(true)}
                 >
-                  Upload Receipt(s)
+                  Upload Invoice(s)
                 </button>
-
                 <Modal show={showModal} onHide={() => setShowModal(false)}>
                   <Modal.Header closeButton>
-                    <Modal.Title>Upload Receipt(s)</Modal.Title>
+                    <Modal.Title>Upload Invoice(s)</Modal.Title>
                   </Modal.Header>
                   <Modal.Body>
                     <input
@@ -360,7 +384,7 @@ const ViewContract = () => {
       <Container>
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>Upload Receipt(s)</Modal.Title>
+            <Modal.Title>Upload Invoice(s)</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <input
@@ -400,7 +424,7 @@ const ViewContract = () => {
               className="btn btn-secondary"
               onClick={() => setShowModal(true)}
             >
-              Upload Receipt(s)
+              Upload Invoice(s)
             </button>
           </Col>
         </Row>
