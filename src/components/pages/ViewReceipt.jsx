@@ -54,7 +54,10 @@ const ViewReceipt = () => {
         const schemaResponse = (
           await AxiosPrivate.get(`/receipt/schema/${params.id}`)
         ).data;
-        setSchema(schemaResponse);
+        const schemaUpdated = schemaResponse.filter(
+          (schema) => schema.key !== "expiration_date"
+        );
+        setSchema(schemaUpdated);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -136,13 +139,20 @@ const ViewReceipt = () => {
           <Row>
             <Col>
               {mismatchedCols.length !== 0 && (
-                <h4>Mismatched Columns and their contract data:</h4>
+                <h4>Mismatched Columns and their contract data equivilent:</h4>
               )}
               <Col>
                 <ul>
                   {mismatchedCols.map((col, index) => (
                     <li key={index}>
-                      {col} : {contract[col]}
+                      {col === "expiration_date"
+                        ? "Invoice (Effective) date should be less than Contract Expiration Date"
+                        : col === "effective_date"
+                        ? "Invoice (Effective) date should be greater than Contract Effective Date"
+                        : col
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (char) => char.toUpperCase())}
+                      : {contract[col]}
                     </li>
                   ))}
                 </ul>

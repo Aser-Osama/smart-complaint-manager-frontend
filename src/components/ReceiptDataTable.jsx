@@ -51,7 +51,11 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
             const value = editableData.data[col.key] || ""; // Fallback if no value found
             return (
               <tr key={col.key}>
-                <td>{col.key}</td>
+                <td>
+                  {col.key
+                    .replace(/_/g, " ")
+                    .replace(/\b\w/g, (char) => char.toUpperCase())}
+                </td>
                 <td>
                   {isEditing ? (
                     <input
