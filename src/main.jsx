@@ -5,6 +5,8 @@ import Login from "./components/pages/Login";
 import Logout from "./components/pages/Logout";
 import RequireAuth from "./components/RequireAuth";
 import Home from "./components/pages/Home";
+import CreateUser from "./components/pages/CreateUser.jsx";
+import CreateAppUser from "./components/pages/CreateAppUser.jsx";
 import AdminPage from "./components/pages/AdminPage";
 import Unauthorized from "./components/pages/Unauthorized.jsx";
 import ViewContract from "./components/pages/ViewContract";
@@ -13,6 +15,7 @@ import { AuthProvider } from "./context/AuthContext";
 import React from "react";
 import DownloadPage from "./components/DownloadFile.jsx";
 import CreateContract from "./components/pages/CreateContract.jsx";
+import CreateSchema from "./components/pages/CreateSchema.jsx";
 
 const router = createBrowserRouter([
   {
@@ -86,6 +89,30 @@ const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <CreateContract />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/createuser",
+        element: (
+          <RequireAuth allowedRoles={["admin"]}>
+            <CreateUser />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/createappuser",
+        element: (
+          <RequireAuth allowedRoles={["admin"]}>
+            <CreateAppUser />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/createschema",
+        element: (
+          <RequireAuth allowedRoles={["admin"]}>
+            <CreateSchema />
           </RequireAuth>
         ),
       },

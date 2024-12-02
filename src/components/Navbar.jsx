@@ -66,6 +66,17 @@ const NavBar = () => {
             </NavDropdown>
           </Nav>
           <Nav>
+            <NavDropdown title="Admin Options" id="basic-nav-dropdown">
+              <NavDropdown.Item as={NavLink} to="/createuser">
+                Create User
+              </NavDropdown.Item>
+              <NavDropdown.Item as={NavLink} to="/createappuser">
+                Create App User
+              </NavDropdown.Item>
+              <NavDropdown.Item as={NavLink} to="/createschema">
+                Create Schema
+              </NavDropdown.Item>
+            </NavDropdown>
             <Nav.Link as={NavLink} to="/logout">
               Logout
             </Nav.Link>
