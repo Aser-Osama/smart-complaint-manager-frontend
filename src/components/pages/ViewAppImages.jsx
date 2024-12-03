@@ -1,9 +1,10 @@
+// ImageGallery.jsx
+
 import React, { useState, useEffect } from "react";
 import {
   Container,
   Row,
   Col,
-  Card,
   Spinner,
   Form,
   Modal,
@@ -11,18 +12,19 @@ import {
 } from "react-bootstrap";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import "./ImageGallery.css";
+import LazyLoadCard from "../LazyLoadCard";
 
 const ImageGallery = () => {
   const axiosPrivate = useAxiosPrivate();
 
   const [images, setImages] = useState([]);
-  const [imageUrls, setImageUrls] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   // State for modal
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImageUrl, setSelectedImageUrl] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -36,32 +38,8 @@ const ImageGallery = () => {
         }
 
         console.log("Images:", response.data);
-        setImages(response.data);
-
-        // Fetch image data for each image
-        const imagePromises = response.data.map(async (image) => {
-          try {
-            const imageResponse = await axiosPrivate.get(
-              `/appimages/file/${image.id}`,
-              { responseType: "blob" }
-            );
-            const imageUrl = URL.createObjectURL(imageResponse.data);
-            return { id: image.id, url: imageUrl };
-          } catch (error) {
-            console.error(`Error fetching image ${image.id}:`, error);
-            return null;
-          }
-        });
-
-        const imageData = await Promise.all(imagePromises);
         if (isMounted) {
-          const urls = {};
-          imageData.forEach((data) => {
-            if (data) {
-              urls[data.id] = data.url;
-            }
-          });
-          setImageUrls(urls);
+          setImages(response.data);
         }
       } catch (error) {
         console.error("Error fetching images:", error);
@@ -74,27 +52,34 @@ const ImageGallery = () => {
 
     fetchImages();
 
-    // Cleanup function to revoke object URLs and prevent memory leaks
+    // Cleanup function
     return () => {
       isMounted = false;
-      Object.values(imageUrls).forEach((url) => {
-        URL.revokeObjectURL(url);
-      });
     };
   }, [axiosPrivate]);
 
   // Handle card click to open modal
-  const handleCardClick = (image) => {
+  const handleCardClick = (image, imageUrl) => {
     setSelectedImage(image);
+    setSelectedImageUrl(imageUrl);
     setShowModal(true);
   };
 
+  // Handle modal close
+  const handleModalClose = () => {
+    if (selectedImageUrl) {
+      URL.revokeObjectURL(selectedImageUrl);
+      setSelectedImageUrl(null);
+    }
+    setShowModal(false);
+  };
+
   // Handle image download
-  const handleDownload = (image) => {
-    if (imageUrls[image.id]) {
+  const handleDownload = () => {
+    if (selectedImageUrl && selectedImage) {
       const link = document.createElement("a");
-      link.href = imageUrls[image.id];
-      link.download = image.image_sn || `image_${image.id}`;
+      link.href = selectedImageUrl;
+      link.download = selectedImage.image_sn || `image_${selectedImage.id}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -156,62 +141,21 @@ const ImageGallery = () => {
       <Row xs={1} sm={2} md={3} lg={4}>
         {filteredImages.map((image) => (
           <Col key={image.id} className="mb-4">
-            <Card
-              onClick={() => handleCardClick(image)}
-              style={{ cursor: "pointer" }}
-            >
-              <div className="image-container">
-                {imageUrls[image.id] ? (
-                  <Card.Img
-                    variant="top"
-                    src={imageUrls[image.id]}
-                    alt={`Image ${image.id}`}
-                  />
-                ) : (
-                  <div className="placeholder-image">
-                    <Spinner animation="border" variant="primary" />
-                  </div>
-                )}
-              </div>
-              <Card.Body>
-                <Card.Title>{image.image_sn}</Card.Title>
-                <Card.Text>
-                  <strong>Date Taken:</strong>{" "}
-                  {new Date(image.image_date_taken).toLocaleDateString()}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Uploader:</strong> {image.uploader_user.name}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Email:</strong> {image.uploader_user.email}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Company:</strong> {image.uploader_user.company}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Username:</strong> {image.uploader_user.username}
-                </Card.Text>
-              </Card.Body>
-            </Card>
+            <LazyLoadCard image={image} handleCardClick={handleCardClick} />
           </Col>
         ))}
       </Row>
 
       {/* Modal to display full image */}
       {selectedImage && (
-        <Modal
-          show={showModal}
-          onHide={() => setShowModal(false)}
-          size="lg"
-          centered
-        >
+        <Modal show={showModal} onHide={handleModalClose} size="lg" centered>
           <Modal.Header closeButton>
             <Modal.Title>{selectedImage.image_sn}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {imageUrls[selectedImage.id] ? (
+            {selectedImageUrl ? (
               <img
-                src={imageUrls[selectedImage.id]}
+                src={selectedImageUrl}
                 alt={`Image ${selectedImage.id}`}
                 style={{ width: "100%" }}
               />
@@ -222,13 +166,10 @@ const ImageGallery = () => {
             )}
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
+            <Button variant="secondary" onClick={handleModalClose}>
               Close
             </Button>
-            <Button
-              variant="primary"
-              onClick={() => handleDownload(selectedImage)}
-            >
+            <Button variant="primary" onClick={handleDownload}>
               Download
             </Button>
           </Modal.Footer>
