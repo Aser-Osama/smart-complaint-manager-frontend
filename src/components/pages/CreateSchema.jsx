@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
+
 import {
   Container,
   Form,
@@ -8,7 +10,6 @@ import {
   InputGroup,
   Alert,
 } from "react-bootstrap";
-import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 
 const CreateSchema = () => {
   const [objects, setObjects] = useState([]);

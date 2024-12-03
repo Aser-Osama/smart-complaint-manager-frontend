@@ -11,6 +11,8 @@ import AdminPage from "./components/pages/AdminPage";
 import Unauthorized from "./components/pages/Unauthorized.jsx";
 import ViewContract from "./components/pages/ViewContract";
 import ViewReceipt from "./components/pages/ViewReceipt";
+import ViewAppUser from "./components/pages/ViewAppUsers.jsx";
+import ViewAppImages from "./components/pages/ViewAppImages.jsx";
 import { AuthProvider } from "./context/AuthContext";
 import React from "react";
 import DownloadPage from "./components/DownloadFile.jsx";
@@ -113,6 +115,22 @@ const router = createBrowserRouter([
         element: (
           <RequireAuth allowedRoles={["admin"]}>
             <CreateSchema />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/viewappusers",
+        element: (
+          <RequireAuth allowedRoles={["admin"]}>
+            <ViewAppUser />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/viewappimages",
+        element: (
+          <RequireAuth allowedRoles={["admin"]}>
+            <ViewAppImages />
           </RequireAuth>
         ),
       },

@@ -70,11 +70,17 @@ const NavBar = () => {
               <NavDropdown.Item as={NavLink} to="/createuser">
                 Create User
               </NavDropdown.Item>
+              <NavDropdown.Item as={NavLink} to="/createschema">
+                Create Schema
+              </NavDropdown.Item>
               <NavDropdown.Item as={NavLink} to="/createappuser">
                 Create App User
               </NavDropdown.Item>
-              <NavDropdown.Item as={NavLink} to="/createschema">
-                Create Schema
+              <NavDropdown.Item as={NavLink} to="/viewappusers">
+                View App Users
+              </NavDropdown.Item>
+              <NavDropdown.Item as={NavLink} to="/viewappimages">
+                View App Images
               </NavDropdown.Item>
             </NavDropdown>
             <Nav.Link as={NavLink} to="/logout">
