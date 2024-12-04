@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  sampleproject:
+    image: sampleproject
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+      VITE_BACKEND_URL: http://localhost:5000/api
+    ports:
+      - 3000:3000

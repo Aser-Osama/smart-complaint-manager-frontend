@@ -1,8 +1,8 @@
 // src/api/axios.js
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api"; // Adjust the base URL as needed
-
+const BASE_URL = import.meta.env.VITE_BACKEND_URL // Adjust the base URL as needed
+//const BASE_URL = "http://localhost:5000/api";
 export default axios.create({
   baseURL: BASE_URL,
   withCredentials: true,

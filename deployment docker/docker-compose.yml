@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  react-frontend:
+    container_name: react-frontend
+    image: ghcr.io/online-dimensions/smart-complaint-manager-frontend:dev
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+      VITE_BACKEND_URL: http://localhost:5000/api
+    ports:
+      - 3000:3000
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+  image: containrrr/watchtower  # Updated to the correct image
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /root/.docker/config.json:/config.json
+  command: --interval 30 --label-enable  # Use label filtering to update specific containers
+  labels:
+    - "com.centurylinklabs.watchtower.enable=true"
