@@ -3,9 +3,7 @@ import Table from "react-bootstrap/Table";
 import { FaEdit, FaSave } from "react-icons/fa";
 
 function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
-  // Convert receipt.data to a structure keyed by 'key'
-  // that holds value, quantity, currency, total_price
-  const [editableData, setEditableData] = useState({
+  const initializeEditableData = (receipt) => ({
     id: receipt.id,
     data: Array.isArray(receipt.data)
       ? receipt.data.reduce((acc, field) => {
@@ -20,31 +18,30 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
       : {},
   });
 
-  // Ensure all schema keys are present in editableData.data with all fields
+  const [editableData, setEditableData] = useState(
+    initializeEditableData(receipt)
+  );
+
   useEffect(() => {
-    const updatedData = { ...editableData.data };
-    schema.forEach((col) => {
-      if (!(col.key in updatedData)) {
-        updatedData[col.key] = {
-          value: "",
-          quantity: "",
-          currency: "",
-          total_price: "",
-        };
-      } else {
-        // Ensure all fields exist for each key
-        const existing = updatedData[col.key];
-        updatedData[col.key] = {
-          value: existing.value || "",
-          quantity: existing.quantity || "",
-          currency: existing.currency || "",
-          total_price: existing.total_price || "",
-        };
-      }
+    setEditableData(initializeEditableData(receipt));
+  }, [receipt]);
+
+  useEffect(() => {
+    setEditableData((prevData) => {
+      const updatedData = { ...prevData.data };
+      schema.forEach((col) => {
+        if (!(col.key in updatedData)) {
+          updatedData[col.key] = {
+            value: "",
+            quantity: "",
+            currency: "",
+            total_price: "",
+          };
+        }
+      });
+      return { ...prevData, data: updatedData };
     });
-    setEditableData((prevData) => ({ ...prevData, data: updatedData }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schema, receipt]);
+  }, [schema]);
 
   const handleChange = (key, fieldName, newValue) => {
     setEditableData((prevData) => ({
@@ -67,17 +64,20 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
           key,
           {
             ...fields,
-            value: fields.value === "" ? null : fields.value,
-            quantity: fields.quantity === "" ? null : fields.quantity,
-            currency: fields.currency === "" ? null : fields.currency,
-            total_price: fields.total_price === "" ? null : fields.total_price,
+            value: fields.value || null,
+            quantity: fields.quantity || null,
+            currency: fields.currency || null,
+            total_price: fields.total_price || null,
           },
         ])
       ),
     };
-    console.log(cleanedData);
     onSave(cleanedData);
   };
+
+  const getCellStyle = (value) => ({
+    backgroundColor: value ? "transparent" : "#f0f0f0",
+  });
 
   return (
     <div>
@@ -100,7 +100,6 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
               total_price: "",
             };
 
-            // Format the row title
             const rowTitle = col.key
               .replace(/_/g, " ")
               .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -108,7 +107,7 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
             return (
               <tr key={col.key}>
                 <td>{rowTitle}</td>
-                <td>
+                <td style={getCellStyle(rowData.value)}>
                   {isEditing ? (
                     <input
                       type="text"
@@ -121,7 +120,7 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
                     rowData.value
                   )}
                 </td>
-                <td>
+                <td style={getCellStyle(rowData.quantity)}>
                   {isEditing ? (
                     <input
                       type="text"
@@ -134,7 +133,7 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
                     rowData.quantity
                   )}
                 </td>
-                <td>
+                <td style={getCellStyle(rowData.currency)}>
                   {isEditing ? (
                     <input
                       type="text"
@@ -147,9 +146,16 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
                     rowData.currency
                   )}
                 </td>
-                <td>
-                  {/* total_price is NOT editable */}
-                  {rowData.total_price}
+                <td
+                  style={getCellStyle(
+                    rowData.total_price && rowData.total_price !== "0.00"
+                      ? rowData.total_price
+                      : ""
+                  )}
+                >
+                  {rowData.total_price && rowData.total_price !== "0.00"
+                    ? rowData.total_price
+                    : ""}
                 </td>
               </tr>
             );

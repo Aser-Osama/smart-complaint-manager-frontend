@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import EditableReceiptTable from "../ReceiptDataTable";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import { useParams, NavLink } from "react-router-dom";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Alert } from "react-bootstrap";
+import MismatchedColumnsTable from "../mismatchedColsTable";
 
 const ViewReceipt = () => {
   const [schema, setSchema] = useState([]);
@@ -12,6 +13,7 @@ const ViewReceipt = () => {
   const [contract, setContract] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [error, setError] = useState(null);
+  const [editNotice, setEditNotice] = useState(null);
   const [validationErrors, setValidationErrors] = useState(null);
   const [mismatchedCols, setMismatchedCols] = useState([]);
   const params = useParams();
@@ -37,7 +39,8 @@ const ViewReceipt = () => {
         setReceipt(receiptResponse);
         setContractId(receiptResponse.contract_id);
 
-        setMismatchedCols(receiptResponse?.mismatched_columns?.col ?? []);
+        fetchMismatch();
+
         const contractResponse = (
           await AxiosPrivate.get(`/contract/id/${receiptResponse.contract_id}`)
         ).data;
@@ -87,8 +90,9 @@ const ViewReceipt = () => {
       const response = await AxiosPrivate.post(`/receipt/getmismatchedcols`, {
         receipt_id: params.id,
       });
+      console.log("Mismatched Columns:", response.data);
       if (response.status === 200) {
-        setMismatchedCols(response?.data[0]?.col ?? []);
+        setMismatchedCols(response?.data);
       } else {
         console.error(error);
       }
@@ -100,9 +104,14 @@ const ViewReceipt = () => {
     try {
       console.log("Saving data:", updatedData);
       await AxiosPrivate.patch(`/receipt`, updatedData);
-      setReceipt(updatedData);
+      const realUpdatedData = await AxiosPrivate.get(
+        `/receipt/id/${params.id}`
+      );
+
+      setReceipt(realUpdatedData.data);
       await fetchMismatch();
       setIsEditing(false);
+      setEditNotice(null);
       setValidationErrors(null);
     } catch (error) {
       console.error("Error saving data:", error.response.data.errors);
@@ -110,7 +119,29 @@ const ViewReceipt = () => {
     }
   };
 
-  const handleEdit = () => setIsEditing(true);
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditNotice(
+      <>
+        <p>If the element does not exist inside this invoice:</p>
+        <ul>
+          <li>
+            Use <strong>-1</strong> as a default value for numbers.
+          </li>
+          <li>
+            Use <strong>"01-01-1971"</strong> for dates.
+          </li>
+          <li>
+            Use <strong>"NA"</strong> for strings.
+          </li>
+        </ul>
+        <p>
+          If the element is a number but not a currency (e.g., "Number of X"),
+          use <strong>-1</strong> for quantity.
+        </p>
+      </>
+    );
+  };
 
   if (!params.id || isNaN(params.id)) {
     return <p>Invalid contract number...</p>;
@@ -126,7 +157,7 @@ const ViewReceipt = () => {
       </Row>
       <Row>
         <Col md={8}>
-          <Row style={{ maxHeight: "600px", overflowY: "auto" }}>
+          <Row style={{ maxHeight: "800px", overflowY: "auto" }}>
             <EditableReceiptTable
               receipt={receipt}
               schema={schema}
@@ -142,23 +173,12 @@ const ViewReceipt = () => {
                 <h4>Mismatched Columns and their contract data equivilent:</h4>
               )}
               <Col>
-                <ul>
-                  {mismatchedCols.map((col, index) => (
-                    <li key={index}>
-                      {col === "expiration_date"
-                        ? "Invoice (Effective) date should be less than Contract Expiration Date"
-                        : col === "effective_date"
-                        ? "Invoice (Effective) date should be greater than Contract Effective Date"
-                        : col
-                            .replace(/_/g, " ")
-                            .replace(/\b\w/g, (char) => char.toUpperCase())}
-                      : {contract[col]}
-                    </li>
-                  ))}
-                </ul>
+                <MismatchedColumnsTable mismatchedCols={mismatchedCols} />
               </Col>
             </Col>
-            <Col>
+          </Row>
+          <Row>
+            <Col className="col-8">
               {validationErrors && (
                 <>
                   <h6>Some validation errors occurred:</h6>
@@ -195,7 +215,7 @@ const ViewReceipt = () => {
                 <iframe
                   src={pdfUrl}
                   width="100%"
-                  height="600px"
+                  height="800px"
                   title="PDF Viewer"
                 />
               </Row>
@@ -209,6 +229,12 @@ const ViewReceipt = () => {
             </>
           ) : (
             <p>Loading PDF...</p>
+          )}
+          {editNotice && (
+            <Alert variant="info" className="mt-3">
+              <strong>Important Notice: </strong>
+              {editNotice}
+            </Alert>
           )}
         </Col>
       </Row>
