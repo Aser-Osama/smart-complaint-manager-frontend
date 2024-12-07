@@ -35,7 +35,7 @@ const MismatchedColumnsTable = ({ mismatchedCols }) => {
       <thead>
         <tr>
           <th>Charge Type</th>
-          <th>Receipt Value</th>
+          <th>Invoice Value</th>
           <th>Contract Value</th>
           <th>Overpay</th>
           <th>Quantity</th>

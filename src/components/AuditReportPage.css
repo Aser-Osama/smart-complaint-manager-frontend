@@ -1,0 +1,50 @@
+/* Audit Report Page Styles */
+.audit-report {
+  font-family: Arial, sans-serif;
+  padding: 2cm 2cm 2cm 2cm;
+}
+
+.report-title {
+  text-align: center;
+  font-size: 2em;
+  margin-bottom: 1em;
+  text-decoration: underline;
+}
+
+.section {
+  margin-bottom: 2em;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+}
+
+.audit-table th, .audit-table td {
+  border: 1px solid black;
+  padding: 0.5em;
+  text-align: left;
+}
+
+.audit-item {
+  border: 1px solid black;
+  padding: 1em;
+  margin-bottom: 1em;
+}
+
+.audit-item h3 {
+  margin: 0 0 0.5em 0;
+}
+
+.total-overpaid {
+  margin-top: 2em;
+  font-size: 1.5em;
+  text-align: right;
+}
+
+.total-amount {
+  color: red;
+  font-weight: bold;
+}
+

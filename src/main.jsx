@@ -18,6 +18,7 @@ import React from "react";
 import DownloadPage from "./components/DownloadFile.jsx";
 import CreateContract from "./components/pages/CreateContract.jsx";
 import CreateSchema from "./components/pages/CreateSchema.jsx";
+import AuditReportPage from "./components/AuditReportPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -59,6 +60,14 @@ const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <ViewContract />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/auditInvoice/:id",
+        element: (
+          <RequireAuth>
+            <AuditReportPage />
           </RequireAuth>
         ),
       },
