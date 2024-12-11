@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Alert } from "react-bootstrap";
+import { Form, Button, Alert, Row, Col } from "react-bootstrap";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import useAuth from "../../hooks/useAuth";
+import { NavLink } from "react-router-dom";
 
 const CreateContract = () => {
   const [file, setFile] = useState(null);
@@ -15,6 +16,12 @@ const CreateContract = () => {
   const [success, setSuccess] = useState(false);
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
+  const [contractCreatedId, setContractCreatedId] = useState(null);
+  const formatName = (key) => {
+    return key
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
 
   useEffect(() => {
     // Fetch available contract types
@@ -77,7 +84,7 @@ const CreateContract = () => {
     );
 
     try {
-      await axiosPrivate.post("/contract", formData, {
+      const contract = await axiosPrivate.post("/contract", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setSuccess(true);
@@ -86,6 +93,7 @@ const CreateContract = () => {
       setContractType("");
       setData({});
       setSchemaFields([]); // Clear schema fields on successful submission
+      setContractCreatedId(contract.data[0].id);
     } catch (error) {
       if (error.response && error.response.data.errors) {
         setErrors(error.response.data.errors);
@@ -99,7 +107,19 @@ const CreateContract = () => {
     <Form onSubmit={handleSubmit}>
       <h3>Create Contract</h3>
       {success && (
-        <Alert variant="success">Contract created successfully!</Alert>
+        <Alert variant="success">
+          <Row>
+            <Col className="me-auto">Contract created successfully!</Col>
+
+            <Col className="text-end">
+              <NavLink
+                to={contractCreatedId ? `/contract/${contractCreatedId}` : `/`}
+              >
+                <button className="btn btn-success">Go To Contract</button>
+              </NavLink>
+            </Col>
+          </Row>
+        </Alert>
       )}
       {errors.length > 0 && (
         <Alert variant="danger">

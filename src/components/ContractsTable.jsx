@@ -60,6 +60,14 @@ function ContractsTable({ contracts }) {
             </th>
             <th
               style={{ cursor: "pointer" }}
+              onClick={() => requestSort("uploader")}
+              className="sortable-column"
+            >
+              Contract Name{" "}
+              <span style={{ float: "right" }}>{getSortIcon("uploader")}</span>
+            </th>
+            <th
+              style={{ cursor: "pointer" }}
               onClick={() => requestSort("contract_type")}
               className="sortable-column"
             >
@@ -67,6 +75,14 @@ function ContractsTable({ contracts }) {
               <span style={{ float: "right" }}>
                 {getSortIcon("contract_type")}
               </span>
+            </th>
+            <th
+              style={{ cursor: "pointer" }}
+              onClick={() => requestSort("company_name")}
+              className="sortable-column"
+            >
+              Company Name{" "}
+              <span style={{ float: "right" }}>{getSortIcon("uploader")}</span>
             </th>
             <th
               style={{ cursor: "pointer" }}
@@ -94,8 +110,10 @@ function ContractsTable({ contracts }) {
           {filteredContracts.map((contract) => (
             <tr key={contract.id}>
               <td>{contract.id}</td>
+              <td>{contract.contract_name}</td>
               <td>{contract.contract_type}</td>
-              <td>{contract.uploader}</td>
+              <td>{contract.company_name}</td>
+              <td>{contract.user.name}</td>
               <td>{new Date(contract.upload_date).toLocaleDateString()}</td>
               <td>
                 <NavLink

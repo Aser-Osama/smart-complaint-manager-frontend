@@ -8,6 +8,7 @@ import { Button, Col, Row } from "react-bootstrap";
 
 const AuditReportPageByContract = () => {
   const [mismatchedCols, setMismatchedCols] = useState([]);
+  const [contract, setContract] = useState({});
   const params = useParams();
   const AxiosPrivate = useAxiosPrivate();
 
@@ -21,7 +22,8 @@ const AuditReportPageByContract = () => {
           }
         );
         if (response.status === 200) {
-          setMismatchedCols(response?.data);
+          setMismatchedCols(response?.data[0]);
+          setContract(response?.data[1]);
         } else {
           console.error(response.error);
         }
@@ -72,6 +74,17 @@ const AuditReportPageByContract = () => {
       format: "a4",
     });
 
+    const notesColumn = (key) => {
+      if (key === "expiration_date") {
+        return "Invoice date should be less than Contract Expiration Date, it is currently after";
+      } else if (key === "effective_date") {
+        return "Invoice (Effective) date should be greater than Contract Effective Date it is currently before";
+      } else if (key === "payment_due_date") {
+        return "Payment terms are too short";
+      }
+      return "";
+    };
+
     // Table Styles (No Colors)
     const tableOptions = {
       margin: { top: 30 },
@@ -97,11 +110,66 @@ const AuditReportPageByContract = () => {
         valign: "middle",
       },
     };
+
+    // Set up page title
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text(`Audit Report for Contract ${params.id}`, 105, 20, {
-      align: "center",
+    doc.setFontSize(24);
+    doc.text(`Audit Report`, 105, 20, { align: "center" });
+
+    // Contract details section
+    doc.setFontSize(16);
+    doc.text(`Contract Details`, 20, 40);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    const contractDetails = [
+      { label: "Contract ID:", value: params.id },
+      { label: "Contract Name:", value: contract.contract_name },
+      { label: "Contract Type:", value: contract.contract_type },
+      { label: "Company:", value: contract.company_name },
+      { label: "Created By:", value: contract.user?.name || "Unknown" },
+    ];
+
+    let yPos = 50;
+    contractDetails.forEach((detail) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(detail.label, 25, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(detail.value || "N/A", 80, yPos);
+      yPos += 8;
     });
+
+    // Report metadata section
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Report Summary`, 20, yPos + 10);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    const reportMetadata = [
+      { label: "Generated On:", value: new Date().toLocaleString() },
+      { label: "Total Containers:", value: countTotalContainers().toString() },
+      {
+        label: "Total Contract Overpay:",
+        value: `$${calculateTotalOverpayForContract().toFixed(2)}`,
+        highlight: true,
+      },
+    ];
+
+    yPos += 20;
+    reportMetadata.forEach((metadata) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(metadata.label, 25, yPos);
+      doc.setFont("helvetica", "normal");
+      if (metadata.highlight) {
+        doc.setTextColor(255, 0, 0); // Red color for overpay amount
+      }
+      doc.text(metadata.value, 80, yPos);
+      doc.setTextColor(0, 0, 0); // Reset to black
+      yPos += 8;
+    });
+
+    doc.addPage();
 
     mismatchedCols.forEach((receipt, index) => {
       if (index > 0) doc.addPage();
@@ -124,6 +192,7 @@ const AuditReportPageByContract = () => {
           formatColumnName(col.key),
           col.receipt_value || "N/A",
           col.contract_value || "N/A",
+          notesColumn(col.key),
         ]);
 
         doc.autoTable({
@@ -141,7 +210,7 @@ const AuditReportPageByContract = () => {
             [
               [
                 {
-                  content: `- Element: ${row[0]}`,
+                  content: `- ${row[0]}`,
                   colSpan: 4,
                   styles: { fontStyle: "bold", halign: "left" },
                 },
@@ -174,10 +243,11 @@ const AuditReportPageByContract = () => {
         });
         const overchargeRows = overcharges.map((col) => [
           formatColumnName(col.key),
-          col.receipt_value || "N/A",
-          col.contract_value || "N/A",
-          col.total_overpay?.toFixed(2) || "-",
-          col.quantity || "-",
+          col.receipt_value,
+          col.contract_value,
+          col.overpay,
+          col.quantity,
+          col.total_overpay,
         ]);
 
         doc.autoTable({
@@ -185,10 +255,11 @@ const AuditReportPageByContract = () => {
           head: [
             [
               "Charge Type",
-              "Invoice Value",
-              "Contract Value",
-              "Overpay",
+              "Invoice Rate",
+              "Contract Rate",
+              "Overcharge",
               "Quantity",
+              "Total Overcharge",
             ],
           ],
           body: overchargeRows,
@@ -206,16 +277,6 @@ const AuditReportPageByContract = () => {
         { align: "center" }
       );
     });
-
-    doc.setFontSize(14);
-    doc.text(
-      `Total Containers: ${countTotalContainers()} | Total Overpay for Contract: $${calculateTotalOverpayForContract().toFixed(
-        2
-      )}`,
-      105,
-      290,
-      { align: "center" }
-    );
 
     const filename = `Audit_Report_Contract_${params.id}_${
       new Date().toISOString().split("T")[0]

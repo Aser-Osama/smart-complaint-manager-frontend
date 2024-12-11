@@ -213,7 +213,7 @@ const ViewContract = () => {
             <Toast
               onClose={() => setShowToast(false)}
               show={showToast}
-              delay={5000}
+              delay={10000}
               autohide
             >
               <Toast.Header>
@@ -415,8 +415,7 @@ const ViewContract = () => {
               size={20}
             />
           </Col>
-          <h1 className="text-danger">Error fetching data</h1>
-          <h5>{error.message}</h5>
+          <h2>{error.message}</h2>
         </Row>
         <Row>
           <Col className="me-auto">

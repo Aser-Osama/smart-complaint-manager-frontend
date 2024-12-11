@@ -126,7 +126,7 @@ function ReceiptTable({ receipts, pageNum, pageSize }) {
             >
               <td>{receipt.id}</td>
               <td>{receipt.contract_id}</td>
-              <td>{receipt.uploader}</td>
+              <td>{receipt.user.name}</td>
               <td>{new Date(receipt.upload_date).toLocaleDateString()}</td>
               <td>
                 {receipt.has_mismatch && (

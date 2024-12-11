@@ -41,7 +41,7 @@ const AuditReportPage = () => {
     } else if (key === "effective_date") {
       return "Invoice (Effective) date should be greater than Contract Effective Date it is currently before";
     } else if (key === "payment_due_date") {
-      return "Payment is overdue, payment due date has passed";
+      return "Payment terms are too short";
     }
     return "";
   };
@@ -125,7 +125,7 @@ const AuditReportPage = () => {
         [
           [
             {
-              content: `- Element: ${row[0]}`,
+              content: `-${row[0]}`,
               colSpan: 4,
               styles: { fontStyle: "bold", halign: "left" },
             },

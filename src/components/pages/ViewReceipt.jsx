@@ -168,13 +168,25 @@ const ViewReceipt = () => {
             {error && <p className="text-danger">{error}</p>}
           </Row>
           <Row>
+            <Col className="me-auto">
+              <NavLink to={`/contract/${contractId}`}>
+                <button className="btn btn-danger">
+                  Back to Contract {contractId}
+                </button>
+              </NavLink>
+            </Col>
+            <Col className="text-end">
+              <NavLink to={`/auditinvoice/${params.id}`}>
+                <button className="btn btn-primary">
+                  Generate Invoice Report
+                </button>
+              </NavLink>
+            </Col>
+          </Row>
+          <hr />
+          <Row>
             <Col>
-              {mismatchedCols.length !== 0 && (
-                <h4>Mismatched Columns and their contract data equivilent:</h4>
-              )}
-              <Col>
-                <MismatchedColumnsTable mismatchedCols={mismatchedCols} />
-              </Col>
+              <MismatchedColumnsTable mismatchedCols={mismatchedCols} />
             </Col>
           </Row>
           <Row>
@@ -196,22 +208,6 @@ const ViewReceipt = () => {
                   </ul>
                 </>
               )}
-            </Col>
-          </Row>
-          <Row>
-            <Col className="me-auto">
-              <NavLink to={`/contract/${contractId}`}>
-                <button className="btn btn-danger">
-                  Back to Contract {contractId}
-                </button>
-              </NavLink>
-            </Col>
-            <Col className="text-end">
-              <NavLink to={`/auditinvoice/${params.id}`}>
-                <button className="btn btn-primary">
-                  Generate Invoice Report
-                </button>
-              </NavLink>
             </Col>
           </Row>
         </Col>
