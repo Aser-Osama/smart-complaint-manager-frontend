@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { Button, Col, Row } from "react-bootstrap";
 
 const AuditReportPage = () => {
   const [mismatchedCols, setMismatchedCols] = useState([]);
@@ -36,15 +37,21 @@ const AuditReportPage = () => {
   };
   const notesColumn = (key) => {
     if (key === "expiration_date") {
-      return "Invoice (Effective) date should be less than Contract Expiration Date";
+      return "Invoice date should be less than Contract Expiration Date, it is currently after";
     } else if (key === "effective_date") {
-      return "Invoice (Effective) date should be greater than Contract Effective Date";
+      return "Invoice (Effective) date should be greater than Contract Effective Date it is currently before";
+    } else if (key === "payment_due_date") {
+      return "Payment is overdue, payment due date has passed";
     }
     return "";
   };
 
-  const filteredWithQuantity = mismatchedCols.filter((col) => col.quantity);
-  const filteredWithoutQuantity = mismatchedCols.filter((col) => !col.quantity);
+  const filteredWithQuantity = mismatchedCols.filter(
+    (col) => col.quantity && col.key !== "number_of_containers"
+  );
+  const filteredWithoutQuantity = mismatchedCols.filter(
+    (col) => !col.quantity && col.key !== "number_of_containers"
+  );
 
   const calculateTotalOverpay = () =>
     filteredWithQuantity.reduce(
@@ -106,8 +113,41 @@ const AuditReportPage = () => {
     doc.autoTable({
       ...tableOptions,
       startY: 40,
-      head: [["Inconsistency On", "Invoice Value", "Contract Value", "Notes"]],
-      body: inconsistencyRows,
+      styles: {
+        lineWidth: 0, // No borders
+        cellPadding: { top: 0, left: 5, bottom: 2, right: 5 },
+        font: "helvetica",
+        fontSize: 10,
+        textColor: [0, 0, 0],
+      },
+      head: [],
+      body: inconsistencyRows.flatMap((row) =>
+        [
+          [
+            {
+              content: `- Element: ${row[0]}`,
+              colSpan: 4,
+              styles: { fontStyle: "bold", halign: "left" },
+            },
+          ],
+          [
+            {
+              content: `- Contract Value: ${row[2]}, Invoice Value: ${row[1]}`,
+              colSpan: 4,
+              styles: { halign: "left" },
+            },
+          ],
+          row[3]
+            ? [
+                {
+                  content: `- Notes: ${row[3]}`,
+                  colSpan: 4,
+                  styles: { halign: "left" },
+                },
+              ]
+            : null,
+        ].filter(Boolean)
+      ),
     });
 
     // Invoice Overcharges Table
@@ -158,13 +198,13 @@ const AuditReportPage = () => {
   return (
     <div className="audit-report">
       <h1 className="report-title">Audit Report for receipt {params.id}</h1>
-
-      <button onClick={() => window.print()} className="print-button">
-        Print Report
-      </button>
-      <button onClick={generatePDF} className="download-button">
-        Download Report
-      </button>
+      <Row>
+        <Col className="ms-auto text-end">
+          <Button onClick={generatePDF} className="download-button">
+            Download Report
+          </Button>
+        </Col>
+      </Row>
 
       <section className="section">
         <h2>Invoice Inconsistencies</h2>

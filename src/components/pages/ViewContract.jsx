@@ -268,6 +268,11 @@ const ViewContract = () => {
                 </NavLink>
               </Col>
               <Col className="ms-auto me-0 text-end">
+                <NavLink to={`/auditcontract/${params.id}`}>
+                  <button className="btn btn-primary me-2">
+                    Generate Contract Report
+                  </button>
+                </NavLink>
                 <button
                   className="btn btn-secondary"
                   onClick={() => setShowModal(true)}

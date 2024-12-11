@@ -206,6 +206,13 @@ const ViewReceipt = () => {
                 </button>
               </NavLink>
             </Col>
+            <Col className="text-end">
+              <NavLink to={`/auditinvoice/${params.id}`}>
+                <button className="btn btn-primary">
+                  Generate Invoice Report
+                </button>
+              </NavLink>
+            </Col>
           </Row>
         </Col>
         <Col md={4}>
