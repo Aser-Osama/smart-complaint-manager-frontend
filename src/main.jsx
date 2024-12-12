@@ -20,6 +20,7 @@ import CreateContract from "./components/pages/CreateContract.jsx";
 import CreateSchema from "./components/pages/CreateSchema.jsx";
 import AuditReportPage from "./components/AuditReportPage.jsx";
 import AuditContractPage from "./components/AuditContractPage.jsx";
+import UpdateSchemas from "./components/pages/UpdateSchema.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -132,6 +133,14 @@ const router = createBrowserRouter([
         element: (
           <RequireAuth allowedRoles={["admin"]}>
             <CreateSchema />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/UpdateSchema",
+        element: (
+          <RequireAuth allowedRoles={["admin"]}>
+            <UpdateSchemas />
           </RequireAuth>
         ),
       },

@@ -9,6 +9,7 @@ const CreateContract = () => {
   const [uploader, setUploader] = useState("");
   const [contractType, setContractType] = useState("");
   const [contract_name, setContractName] = useState("");
+  const [company_name, setCompanyName] = useState("");
   const [contractTypes, setContractTypes] = useState([]); // Store contract types separately
   const [schemaFields, setSchemaFields] = useState([]); // Store fields for selected schema
   const [data, setData] = useState({});
@@ -80,6 +81,7 @@ const CreateContract = () => {
         contract_type: contractType,
         data,
         contract_name,
+        company_name,
       })
     );
 
@@ -141,6 +143,15 @@ const CreateContract = () => {
           onChange={(e) => setContractName(e.target.value)}
         />
       </Form.Group>
+      <Form.Group controlId="ClientName">
+        <Form.Label>Client name</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Enter Contract Name"
+          value={company_name}
+          onChange={(e) => setCompanyName(e.target.value)}
+        />
+      </Form.Group>
       <Form.Group controlId="contractType">
         <Form.Label>Contract Type</Form.Label>
         <Form.Control
@@ -158,13 +169,13 @@ const CreateContract = () => {
       </Form.Group>
       {schemaFields.map((field, index) => (
         <Form.Group key={index} controlId={`dataField-${field.key_name}`}>
-          <Form.Label>{field.key_name}</Form.Label>
+          <Form.Label>{formatName(field.key_name)}</Form.Label>
           <Form.Control
             type={
-              field.value_type === "int"
+              field.value_type === "number"
                 ? "number"
-                : field.value_type === "decimal"
-                ? "number"
+                : field.value_type === "date"
+                ? "date"
                 : "text"
             }
             name={field.key_name}

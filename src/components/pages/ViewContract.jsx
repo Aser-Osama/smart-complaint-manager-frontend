@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { FaSync } from "react-icons/fa";
-import EditableReceiptTable from "../ReceiptDataTable";
+import EditableContractTable from "../ContractDataTable.jsx";
 import Pagination from "../Pagination.jsx";
 import {
   Button,
@@ -12,7 +12,6 @@ import {
   Row,
   Toast,
   ToastContainer,
-  Form,
   ToggleButton,
   ToggleButtonGroup,
 } from "react-bootstrap";
@@ -49,9 +48,7 @@ const ViewContract = () => {
 
   const handleSave = async (updatedData) => {
     try {
-      console.log("Saving data:", updatedData);
       await AxiosPrivate.patch(`/contract`, updatedData);
-      setContractData(updatedData);
       setIsEditing(false);
     } catch (error) {
       console.error("Error saving data:", error);
@@ -311,7 +308,7 @@ const ViewContract = () => {
                     <Modal.Title>Contract Data</Modal.Title>
                   </Modal.Header>
                   <Modal.Body>
-                    <EditableReceiptTable
+                    <EditableContractTable
                       receipt={contractData}
                       schema={schema}
                       isEditing={isEditing}

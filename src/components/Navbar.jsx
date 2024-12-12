@@ -41,7 +41,7 @@ const NavBar = () => {
     <Navbar bg="light" expand="lg">
       <Container>
         <Navbar.Brand as={Link} to="/">
-          Smart Complaint System
+          Provar.io
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
@@ -72,6 +72,9 @@ const NavBar = () => {
               </NavDropdown.Item>
               <NavDropdown.Item as={NavLink} to="/createschema">
                 Create Schema
+              </NavDropdown.Item>
+              <NavDropdown.Item as={NavLink} to="/updateschema">
+                Update Schema
               </NavDropdown.Item>
               <NavDropdown.Item as={NavLink} to="/createappuser">
                 Create App User
