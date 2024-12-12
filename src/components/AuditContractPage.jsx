@@ -85,6 +85,11 @@ const AuditReportPageByContract = () => {
       format: "a4",
     });
 
+    const safeString = (value) => {
+      if (value === null || value === undefined) return "N/A";
+      return String(value);
+    };
+
     const notesColumn = (key) => {
       if (key === "expiration_date") {
         return "Invoice date should be less than Contract Expiration Date, it is currently after";
@@ -186,93 +191,96 @@ const AuditReportPageByContract = () => {
       const invoiceNumber = receipt?.receipt_number;
       if (index > 0) doc.addPage();
 
-      doc.setFontSize(14);
-      doc.text(
-        `Invoice ID: ${receipt?.receipt_id}${
-          invoiceNumber ? `, Invoice Number: ${invoiceNumber}` : ""
-        }`,
-        105,
-        27,
-        {
-          align: "center",
-        }
-      );
+      // Fix: Ensure text is properly formatted and not undefined
+      const headerText = `Invoice ID: ${safeString(receipt?.receipt_id)}${
+        invoiceNumber ? `, Invoice Number: ${safeString(invoiceNumber)}` : ""
+      }`;
 
-      const inconsistencies = receipt?.mismatches?.filter(
-        (col) => !col?.total_overpay
-      );
-      const overcharges = receipt?.mismatches?.filter(
-        (col) => col?.total_overpay
-      );
+      doc.setFontSize(14);
+      doc.text(headerText, 105, 27, {
+        align: "center",
+      });
+
+      const inconsistencies =
+        receipt?.mismatches?.filter((col) => col && !col.total_overpay) || [];
+      const overcharges =
+        receipt?.mismatches?.filter((col) => col && col.total_overpay) || [];
 
       if (inconsistencies.length > 0) {
-        // Invoice Inconsistencies Table
         doc.setFontSize(14);
         doc.text("Invoice Inconsistencies", 105, 35, { align: "center" });
+
         const inconsistencyRows = inconsistencies.map((col) => [
-          formatColumnName(col.key),
-          col.receipt_value || "N/A",
-          col.contract_value || "N/A",
-          notesColumn(col.key),
+          formatColumnName(col.key || ""),
+          safeString(col.receipt_value),
+          safeString(col.contract_value),
+          notesColumn(col.key || ""),
         ]);
 
         doc.autoTable({
           ...tableOptions,
           startY: 40,
           styles: {
-            lineWidth: 0, // No borders
+            ...tableOptions.styles,
+            lineWidth: 0,
             cellPadding: { top: 0, left: 5, bottom: 2, right: 5 },
-            font: "helvetica",
-            fontSize: 10,
-            textColor: [0, 0, 0],
           },
           head: [],
-          body: inconsistencyRows.flatMap((row) =>
-            [
-              [
+          body: inconsistencyRows.flatMap((row) => {
+            const sections = [];
+
+            if (row[0]) {
+              sections.push([
                 {
                   content: `- ${row[0]}`,
                   colSpan: 4,
                   styles: { fontStyle: "bold", halign: "left" },
                 },
-              ],
-              [
+              ]);
+            }
+
+            sections.push([
+              {
+                content: `- Contract Value: ${row[2]}, Invoice Value: ${row[1]}`,
+                colSpan: 4,
+                styles: { halign: "left" },
+              },
+            ]);
+
+            if (row[3]) {
+              sections.push([
                 {
-                  content: `- Contract Value: ${row[2]}, Invoice Value: ${row[1]}`,
+                  content: `- Notes: ${row[3]}`,
                   colSpan: 4,
                   styles: { halign: "left" },
                 },
-              ],
-              row[3]
-                ? [
-                    {
-                      content: `- Notes: ${row[3]}`,
-                      colSpan: 4,
-                      styles: { halign: "left" },
-                    },
-                  ]
-                : null,
-            ].filter(Boolean)
-          ),
+              ]);
+            }
+
+            return sections;
+          }),
         });
       }
 
       if (overcharges.length > 0) {
-        // Invoice Overcharges Table
-        doc.text("Invoice Overcharges", 105, doc.lastAutoTable.finalY + 10, {
+        const yPosition = doc.lastAutoTable
+          ? doc.lastAutoTable.finalY + 10
+          : 40;
+        doc.text("Invoice Overcharges", 105, yPosition, {
           align: "center",
         });
+
         const overchargeRows = overcharges.map((col) => [
-          formatColumnName(col.key),
-          col.receipt_value,
-          col.contract_value,
-          col.overpay,
-          col.quantity,
-          col.total_overpay,
+          safeString(formatColumnName(col.key)),
+          safeString(col.receipt_value),
+          safeString(col.contract_value),
+          safeString(col.overpay),
+          safeString(col.quantity),
+          safeString(col.total_overpay),
         ]);
 
         doc.autoTable({
-          startY: doc.lastAutoTable.finalY + 15 || 40,
+          startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 40,
           head: [
             [
               "Charge Type",
@@ -290,11 +298,15 @@ const AuditReportPageByContract = () => {
       }
 
       const totalOverpayForReceipt = calculateTotalOverpayForReceipt(receipt);
+      const yPosition = doc.lastAutoTable
+        ? doc.lastAutoTable.finalY + 10
+        : doc.internal.pageSize.height - 20;
+
       doc.setFontSize(12);
       doc.text(
         `Total Overpay for Invoice: $${totalOverpayForReceipt.toFixed(2)}`,
         105,
-        doc.lastAutoTable.finalY + 10,
+        yPosition,
         { align: "center" }
       );
     });
