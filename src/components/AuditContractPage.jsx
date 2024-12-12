@@ -183,12 +183,12 @@ const AuditReportPageByContract = () => {
     doc.addPage();
 
     mismatchedCols.forEach((receipt, index) => {
-      const invoiceNumber = receipt.receipt_number;
+      const invoiceNumber = receipt?.receipt_number;
       if (index > 0) doc.addPage();
 
       doc.setFontSize(14);
       doc.text(
-        `Invoice ID: ${receipt.receipt_id}${
+        `Invoice ID: ${receipt?.receipt_id}${
           invoiceNumber ? `, Invoice Number: ${invoiceNumber}` : ""
         }`,
         105,
@@ -198,10 +198,12 @@ const AuditReportPageByContract = () => {
         }
       );
 
-      const inconsistencies = receipt.mismatches.filter(
-        (col) => !col.total_overpay
+      const inconsistencies = receipt?.mismatches?.filter(
+        (col) => !col?.total_overpay
       );
-      const overcharges = receipt.mismatches.filter((col) => col.total_overpay);
+      const overcharges = receipt?.mismatches?.filter(
+        (col) => col?.total_overpay
+      );
 
       if (inconsistencies.length > 0) {
         // Invoice Inconsistencies Table
