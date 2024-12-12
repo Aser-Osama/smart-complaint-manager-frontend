@@ -8,6 +8,7 @@ import { Button, Col, Row } from "react-bootstrap";
 
 const AuditReportPage = () => {
   const [mismatchedCols, setMismatchedCols] = useState([]);
+  const [invoiceNumber, setInvoiceNumber] = useState("");
   const params = useParams();
   const AxiosPrivate = useAxiosPrivate();
 
@@ -17,9 +18,9 @@ const AuditReportPage = () => {
         const response = await AxiosPrivate.post(`/receipt/getmismatchedcols`, {
           receipt_id: params.id,
         });
-        console.log("Mismatched Columns:", response.data);
         if (response.status === 200) {
-          setMismatchedCols(response?.data);
+          setMismatchedCols(response?.data[0]);
+          setInvoiceNumber(response?.data[1].value);
         } else {
           console.error(error);
         }
@@ -31,10 +32,22 @@ const AuditReportPage = () => {
   }, [params.id]);
 
   const formatColumnName = (key) => {
-    return key
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
+    // Handle null, undefined, or non-string input
+    if (!key || typeof key !== "string") {
+      return "";
+    }
+
+    // Trim whitespace and handle empty string
+    const trimmedKey = key.trim();
+    if (!trimmedKey) {
+      return "";
+    }
+
+    return trimmedKey
+      .replace(/_/g, " ") // Replace underscores with spaces
+      .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
   };
+
   const notesColumn = (key) => {
     if (key === "expiration_date") {
       return "Invoice date should be less than Contract Expiration Date, it is currently after";
@@ -72,6 +85,8 @@ const AuditReportPage = () => {
     doc.text(`Audit Report for invoice ${params.id}`, 105, 20, {
       align: "center",
     });
+    doc.setFontSize(16);
+    doc.text(`Invoice Number: ${invoiceNumber}`, 105, 25, { align: "center" });
 
     // Table Styles (No Colors)
     const tableOptions = {

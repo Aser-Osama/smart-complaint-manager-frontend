@@ -92,7 +92,7 @@ const ViewReceipt = () => {
       });
       console.log("Mismatched Columns:", response.data);
       if (response.status === 200) {
-        setMismatchedCols(response?.data);
+        setMismatchedCols(response?.data[0]);
       } else {
         console.error(error);
       }

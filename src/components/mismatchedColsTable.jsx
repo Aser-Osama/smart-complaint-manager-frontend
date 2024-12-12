@@ -3,6 +3,9 @@ import Table from "react-bootstrap/Table";
 
 const MismatchedColumnsTable = ({ mismatchedCols }) => {
   const formatColumnName = (key) => {
+    if (!key || typeof key !== "string") {
+      return "";
+    }
     if (key === "expiration_date") {
       return "Invoice (Effective) date should be less than Contract Expiration Date";
     } else if (key === "effective_date") {

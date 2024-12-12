@@ -35,9 +35,20 @@ const AuditReportPageByContract = () => {
   }, [params.id]);
 
   const formatColumnName = (key) => {
-    return key
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
+    // Handle null, undefined, or non-string input
+    if (!key || typeof key !== "string") {
+      return "";
+    }
+
+    // Trim whitespace and handle empty string
+    const trimmedKey = key.trim();
+    if (!trimmedKey) {
+      return "";
+    }
+
+    return trimmedKey
+      .replace(/_/g, " ") // Replace underscores with spaces
+      .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
   };
 
   const calculateTotalOverpayForReceipt = (receipt) => {
@@ -172,12 +183,20 @@ const AuditReportPageByContract = () => {
     doc.addPage();
 
     mismatchedCols.forEach((receipt, index) => {
+      const invoiceNumber = receipt.receipt_number;
       if (index > 0) doc.addPage();
 
       doc.setFontSize(14);
-      doc.text(`Invoice ID: ${receipt.receipt_id}`, 105, 27, {
-        align: "center",
-      });
+      doc.text(
+        `Invoice ID: ${receipt.receipt_id}${
+          invoiceNumber ? `, Invoice Number: ${invoiceNumber}` : ""
+        }`,
+        105,
+        27,
+        {
+          align: "center",
+        }
+      );
 
       const inconsistencies = receipt.mismatches.filter(
         (col) => !col.total_overpay
