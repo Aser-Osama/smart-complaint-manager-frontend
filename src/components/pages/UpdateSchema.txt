@@ -1,6 +1,6 @@
+// this is a page to store the code with the removal of elements allowed 
 import React, { useState, useEffect } from "react";
 import { Table, Button, Form, Alert } from "react-bootstrap";
-import axios from "axios";
 import { axiosPrivate } from "../../api/axios";
 
 const UpdateSchemasPage = () => {
@@ -11,6 +11,7 @@ const UpdateSchemasPage = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [onNewType, setOnNewType] = useState(false);
+
   useEffect(() => {
     fetchContractTypes();
   }, []);
@@ -25,7 +26,7 @@ const UpdateSchemasPage = () => {
       const types = response.data.map((schema) => schema.contract_type);
       setContractTypes(types);
       setContractType(types[0] || "");
-    } catch (err) {
+    } catch {
       setError("Failed to fetch contract types. Please try again later.");
     }
   };
@@ -34,7 +35,7 @@ const UpdateSchemasPage = () => {
     try {
       const response = await axiosPrivate.get(`/schema/types/${contractType}`);
       setSchemas(response.data);
-    } catch (err) {
+    } catch {
       setError("Failed to fetch schemas. Please try again later.");
     }
   };
@@ -59,6 +60,11 @@ const UpdateSchemasPage = () => {
     setSchemas([...schemas, newSchema]);
   };
 
+  const handleRemoveSchema = (index) => {
+    const updatedSchemas = schemas.filter((_, i) => i !== index);
+    setSchemas(updatedSchemas);
+  };
+
   const handleStartNewType = () => {
     setSchemas([]);
     setContractType(newContractType);
@@ -74,7 +80,7 @@ const UpdateSchemasPage = () => {
       );
       setSuccess(response.data.message);
       setError(null);
-      window.scrollTo(0, 0); // Scroll back to top of page on successful save
+    window.scrollTo(0, 0);
     } catch (err) {
       setError(
         err.response?.data?.error ||
@@ -119,6 +125,7 @@ const UpdateSchemasPage = () => {
           />
         </Form.Group>
       )}
+
       <Table striped bordered hover responsive>
         <thead>
           <tr>
@@ -128,6 +135,7 @@ const UpdateSchemasPage = () => {
             <th>Receipt Valid if _ Contract</th>
             <th>Reviewed In Receipt</th>
             <th>Aliases</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -200,7 +208,7 @@ const UpdateSchemasPage = () => {
                       ? schema.keyAliases?.join(", ")
                       : ""
                   }
-                  onChange={(e) =>
+                                    onChange={(e) =>
                     handleInputChange(
                       index,
                       "keyAliases",
@@ -208,6 +216,14 @@ const UpdateSchemasPage = () => {
                     )
                   }
                 />
+              </td>
+              <td>
+                <Button
+                  variant="danger"
+                  onClick={() => handleRemoveSchema(index)}
+                >
+                  Remove
+                </Button>
               </td>
             </tr>
           ))}

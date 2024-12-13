@@ -139,10 +139,6 @@ const CreateContract = () => {
         </Alert>
       )}
 
-      <Form.Group controlId="fileUpload">
-        <Form.Label className="mb-0 mt-3">Upload Contract File</Form.Label>
-        <Form.Control type="file" onChange={handleFileChange} value="" />
-      </Form.Group>
       <Form.Group controlId="contractType">
         <Form.Label className="mb-0 mt-3">Contract Type</Form.Label>
         <Form.Control
@@ -157,6 +153,10 @@ const CreateContract = () => {
             </option>
           ))}
         </Form.Control>
+      </Form.Group>
+      <Form.Group controlId="fileUpload">
+        <Form.Label className="mb-0 mt-3">Upload Contract File</Form.Label>
+        <Form.Control type="file" onChange={handleFileChange} value="" />
       </Form.Group>
       <Form.Group controlId="ContractName">
         <Form.Label className="mb-0 mt-3">Contract name</Form.Label>

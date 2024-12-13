@@ -23,7 +23,7 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
   const [editableData, setEditableData] = useState(
     initializeEditableData(receipt)
   );
-  const [hideMinusOnes, setHideMinusOnes] = useState(false);
+  const [hideMinusOnes, setHideMinusOnes] = useState(true);
 
   useEffect(() => {
     setEditableData(initializeEditableData(receipt));
@@ -112,11 +112,10 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
             <th>
               Attributes
               <Button
-                variant="link"
                 onClick={() => setHideMinusOnes((prev) => !prev)}
-                style={{ float: "right", padding: 0 }}
+                style={{ float: "right" }}
               >
-                {hideMinusOnes ? <FaEye /> : <FaEyeSlash />}
+                Show Hidden Rows
               </Button>
             </th>
             <th>Value</th>
