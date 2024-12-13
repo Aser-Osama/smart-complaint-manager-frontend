@@ -11,13 +11,14 @@ const UpdateSchemasPage = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [onNewType, setOnNewType] = useState(false);
+  const [done, setDone] = useState(false);
   useEffect(() => {
     fetchContractTypes();
   }, []);
 
   useEffect(() => {
     if (contractType) fetchSchemas();
-  }, [contractType]);
+  }, [contractType, done]);
 
   const fetchContractTypes = async () => {
     try {
@@ -74,6 +75,8 @@ const UpdateSchemasPage = () => {
       setSuccess(response.data.message);
       setError(null);
       window.scrollTo(0, 0); // Scroll back to top of page on successful save
+
+      setDone(!done);
     } catch (err) {
       setError(
         err.response?.data?.error ||
