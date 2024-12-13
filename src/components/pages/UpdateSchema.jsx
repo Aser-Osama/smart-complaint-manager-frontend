@@ -47,7 +47,6 @@ const UpdateSchemasPage = () => {
 
   const handleAddSchema = () => {
     const newSchema = {
-      id: Date.now(),
       key_name: "",
       value_type: "number",
       required: false,

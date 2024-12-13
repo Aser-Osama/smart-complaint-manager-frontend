@@ -45,7 +45,7 @@ function ContractsTable({ contracts }) {
     <div>
       <FormControl
         type="text"
-        placeholder="Search by contract type or id"
+        placeholder="Search"
         className="mb-3"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
