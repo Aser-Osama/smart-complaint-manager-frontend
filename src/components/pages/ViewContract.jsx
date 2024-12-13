@@ -384,6 +384,44 @@ const ViewContract = () => {
     )) ||
     (error && (
       <Container>
+        <ToastContainer position="top-end" className="p-3">
+          <Toast
+            onClose={() => setShowToast(false)}
+            show={showToast}
+            delay={10000}
+            autohide
+          >
+            <Toast.Header>
+              <strong className="me-auto">File Uploading</strong>
+            </Toast.Header>
+            <Toast.Body>
+              <h6>Files received and processing has started.</h6>
+              <p>
+                Refreshing using the refrsh button in a few seconds is
+                recommended.
+              </p>
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
+        <ToastContainer position="top-end" className="p-3">
+          <Toast
+            onClose={() => setShowErrorToast(false)}
+            show={showErrorToast}
+            delay={5000}
+            autohide
+          >
+            <Toast.Header>
+              <strong className="me-auto">File Uploading Error</strong>
+            </Toast.Header>
+            <Toast.Body>
+              <h6>Error Uploading Files.</h6>
+              <p>
+                An error has occured while attempting to upload the files.
+                Ensure your files are in PDF format and under 25mbs in size.
+              </p>
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>Upload Invoice(s)</Modal.Title>
