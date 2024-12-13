@@ -19,7 +19,9 @@ function ContractsTable({ contracts }) {
   const filteredContracts = sortedContracts.filter(
     (contract) =>
       contract.contract_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contract.id.toString().includes(searchTerm)
+      contract.id.toString().includes(searchTerm) ||
+      contract.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.contract_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const requestSort = (key) => {

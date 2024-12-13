@@ -10,14 +10,15 @@ const CreateContract = () => {
   const [contractType, setContractType] = useState("");
   const [contract_name, setContractName] = useState("");
   const [company_name, setCompanyName] = useState("");
-  const [contractTypes, setContractTypes] = useState([]); // Store contract types separately
-  const [schemaFields, setSchemaFields] = useState([]); // Store fields for selected schema
+  const [contractTypes, setContractTypes] = useState([]);
+  const [schemaFields, setSchemaFields] = useState([]);
   const [data, setData] = useState({});
   const [errors, setErrors] = useState([]);
   const [success, setSuccess] = useState(false);
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
   const [contractCreatedId, setContractCreatedId] = useState(null);
+
   const formatName = (key) => {
     return key
       .replace(/_/g, " ")
@@ -25,14 +26,13 @@ const CreateContract = () => {
   };
 
   useEffect(() => {
-    // Fetch available contract types
     const fetchContractTypes = async () => {
       try {
-        const response = await axiosPrivate.get("/schema/types"); // Endpoint to get all schemas
+        const response = await axiosPrivate.get("/schema/types");
         const types = [
           ...new Set(response.data.map((schema) => schema.contract_type)),
         ];
-        setContractTypes(types); // Store contract types separately
+        setContractTypes(types);
       } catch (error) {
         console.error("Error fetching contract types:", error);
       }
@@ -41,13 +41,26 @@ const CreateContract = () => {
     fetchContractTypes();
   }, []);
 
-  const handleSchemaSelect = async (type) => {
-    setContractType(type);
+  const clearFields = () => {
+    setFile(null);
+    setUploader(auth.id);
+    setContractType("");
+    setContractName("");
+    setCompanyName("");
     setData({});
+    setSchemaFields([]);
+  };
+
+  const handleSchemaSelect = async (type) => {
+    clearFields();
+    setContractType(type);
     try {
-      const response = await axiosPrivate.get(`/schema/types/${type}`); // Get schema by type
-      setSchemaFields(response.data); // Set fields only for selected schema type
-      console.log(response.data);
+      const response = await axiosPrivate.get(`/schema/types/${type}`);
+      const sortedFields = response.data.sort((a, b) => {
+        const order = { text: 1, date: 2, number: 3 };
+        return order[a.value_type] - order[b.value_type];
+      });
+      setSchemaFields(sortedFields);
     } catch (error) {
       console.error("Error fetching schema fields:", error);
     }
@@ -90,11 +103,7 @@ const CreateContract = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setSuccess(true);
-      setFile(null);
-      setUploader("");
-      setContractType("");
-      setData({});
-      setSchemaFields([]); // Clear schema fields on successful submission
+      clearFields();
       setContractCreatedId(contract.data[0].id);
     } catch (error) {
       if (error.response && error.response.data.errors) {
@@ -112,7 +121,6 @@ const CreateContract = () => {
         <Alert variant="success">
           <Row>
             <Col className="me-auto">Contract created successfully!</Col>
-
             <Col className="text-end">
               <NavLink
                 to={contractCreatedId ? `/contract/${contractCreatedId}` : `/`}
@@ -130,30 +138,13 @@ const CreateContract = () => {
           ))}
         </Alert>
       )}
+
       <Form.Group controlId="fileUpload">
-        <Form.Label>Upload Contract File</Form.Label>
-        <Form.Control type="file" onChange={handleFileChange} />
-      </Form.Group>
-      <Form.Group controlId="ContractName">
-        <Form.Label>Contract name</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Enter Contract Name"
-          value={contract_name}
-          onChange={(e) => setContractName(e.target.value)}
-        />
-      </Form.Group>
-      <Form.Group controlId="ClientName">
-        <Form.Label>Client name</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Enter Contract Name"
-          value={company_name}
-          onChange={(e) => setCompanyName(e.target.value)}
-        />
+        <Form.Label className="mb-0 mt-3">Upload Contract File</Form.Label>
+        <Form.Control type="file" onChange={handleFileChange} value="" />
       </Form.Group>
       <Form.Group controlId="contractType">
-        <Form.Label>Contract Type</Form.Label>
+        <Form.Label className="mb-0 mt-3">Contract Type</Form.Label>
         <Form.Control
           as="select"
           value={contractType}
@@ -167,25 +158,53 @@ const CreateContract = () => {
           ))}
         </Form.Control>
       </Form.Group>
-      {schemaFields.map((field, index) => (
-        <Form.Group key={index} controlId={`dataField-${field.key_name}`}>
-          <Form.Label>{formatName(field.key_name)}</Form.Label>
-          <Form.Control
-            type={
-              field.value_type === "number"
-                ? "number"
-                : field.value_type === "date"
-                ? "date"
-                : "text"
-            }
-            name={field.key_name}
-            placeholder={`Enter ${field.key_name}`}
-            required={field.required}
-            onChange={handleInputChange}
-          />
-        </Form.Group>
-      ))}
-      <Button variant="primary" type="submit">
+      <Form.Group controlId="ContractName">
+        <Form.Label className="mb-0 mt-3">Contract name</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Enter Contract Name"
+          value={contract_name}
+          onChange={(e) => setContractName(e.target.value)}
+        />
+      </Form.Group>
+
+      <Form.Group controlId="ClientName">
+        <Form.Label className="mb-0 mt-3">Client name</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Enter Company Name"
+          value={company_name}
+          onChange={(e) => setCompanyName(e.target.value)}
+        />
+      </Form.Group>
+      <hr className="mt-3 mb-0" />
+      <Row>
+        {schemaFields.map((field, index) => (
+          <Col md={6} key={index}>
+            <Form.Group controlId={`dataField-${field.key_name}`}>
+              <Form.Label className="mb-0 mt-3">
+                {formatName(field.key_name)}
+              </Form.Label>
+              <Form.Control
+                type={
+                  field.value_type === "number"
+                    ? "number"
+                    : field.value_type === "date"
+                    ? "date"
+                    : "text"
+                }
+                step={field.value_type === "number" ? "any" : ""}
+                name={field.key_name}
+                placeholder={`Enter ${field.key_name}`}
+                required={field.required}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+          </Col>
+        ))}
+      </Row>
+
+      <Button variant="primary" type="submit" className="mt-3">
         Submit
       </Button>
     </Form>

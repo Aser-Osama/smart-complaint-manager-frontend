@@ -167,7 +167,7 @@ const ViewReceipt = () => {
             />
             {error && <p className="text-danger">{error}</p>}
           </Row>
-          <Row>
+          <Row className="mt-3">
             <Col className="me-auto">
               <NavLink to={`/contract/${contractId}`}>
                 <button className="btn btn-danger">

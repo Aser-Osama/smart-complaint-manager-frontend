@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { Button } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
-import { FaEdit, FaSave } from "react-icons/fa";
+import { FaEdit, FaEye, FaEyeSlash, FaSave } from "react-icons/fa";
 
 function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
   const initializeEditableData = (receipt) => ({
@@ -22,6 +23,7 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
   const [editableData, setEditableData] = useState(
     initializeEditableData(receipt)
   );
+  const [hideMinusOnes, setHideMinusOnes] = useState(false);
 
   useEffect(() => {
     setEditableData(initializeEditableData(receipt));
@@ -107,7 +109,16 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
       <Table bordered>
         <thead>
           <tr>
-            <th>{editableData.id}</th>
+            <th>
+              Attributes
+              <Button
+                variant="link"
+                onClick={() => setHideMinusOnes((prev) => !prev)}
+                style={{ float: "right", padding: 0 }}
+              >
+                {hideMinusOnes ? <FaEye /> : <FaEyeSlash />}
+              </Button>
+            </th>
             <th>Value</th>
             <th>Quantity</th>
             <th>Currency</th>
@@ -123,6 +134,11 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
               total_price: "",
               value_type: "text",
             };
+
+            // If hiding -1 rows is enabled and this row's value is -1, skip rendering
+            if (hideMinusOnes && rowData.value === "-1") {
+              return null;
+            }
 
             const rowTitle = col.key
               .replace(/_/g, " ")
@@ -142,6 +158,7 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
                           ? "date"
                           : "text"
                       }
+                      step={rowData.value_type === "number" ? "any" : ""}
                       value={
                         rowData.value_type === "date" ||
                         col.key === "payment_due_date"
@@ -171,7 +188,7 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
                     <td style={getCellStyle(rowData.quantity)}>
                       {isEditing ? (
                         <input
-                          type="text"
+                          type="number"
                           value={rowData.quantity}
                           onChange={(e) =>
                             handleChange(col.key, "quantity", e.target.value)

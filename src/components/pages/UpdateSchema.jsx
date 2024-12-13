@@ -191,11 +191,12 @@ const UpdateSchemasPage = () => {
                 />
               </td>
               <td>
+                {JSON.stringify(schema.keyAliases)}
                 <Form.Control
                   type="text"
                   placeholder="Comma-separated aliases"
                   value={
-                    schema.keyAliases && schema.keyAliases != "null"
+                    schema.keyAliases && Array.isArray(schema.keyAliases)
                       ? schema.keyAliases?.join(", ")
                       : ""
                   }
