@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Table, Button, Form, Alert } from "react-bootstrap";
 import axios from "axios";
 import { axiosPrivate } from "../../api/axios";
+import { FaTrash } from "react-icons/fa";
+import { GiJamesBondAperture } from "react-icons/gi";
 
 const UpdateSchemasPage = () => {
   const [schemas, setSchemas] = useState([]);
@@ -12,6 +14,7 @@ const UpdateSchemasPage = () => {
   const [success, setSuccess] = useState(null);
   const [onNewType, setOnNewType] = useState(false);
   const [done, setDone] = useState(false);
+  const [schemasToDelete, setSchemasToDelete] = useState([]);
   useEffect(() => {
     fetchContractTypes();
   }, []);
@@ -72,6 +75,11 @@ const UpdateSchemasPage = () => {
         `/schema/update/${contractType}`,
         schemas
       );
+      // Delete schemas marked for deletion
+      await Promise.all(
+        schemasToDelete.map((id) => axiosPrivate.delete(`/schema/delete/${id}`))
+      );
+      setSchemasToDelete([]);
       setSuccess(response.data.message);
       setError(null);
       window.scrollTo(0, 0); // Scroll back to top of page on successful save
@@ -84,6 +92,16 @@ const UpdateSchemasPage = () => {
       );
       setSuccess(null);
     }
+  };
+
+  const handleDelete = (id) => {
+    // Mark the schema for deletion
+    setSchemasToDelete((prev) => [...prev, id]);
+    alert(
+      "Deletion will be confirmed when you save changes, you can refersh the page to revert your actions."
+    );
+    // Optionally, remove it from the displayed list
+    setSchemas(schemas.filter((schema) => schema.id !== id));
   };
 
   return (
@@ -130,11 +148,12 @@ const UpdateSchemasPage = () => {
             <th>Receipt Valid if _ Contract</th>
             <th>Reviewed In Receipt</th>
             <th>Aliases</th>
+            <th> Delete </th>
           </tr>
         </thead>
         <tbody>
           {schemas.map((schema, index) => (
-            <tr key={schema.id}>
+            <tr key={index}>
               <td>
                 <Form.Control
                   type="text"
@@ -210,6 +229,27 @@ const UpdateSchemasPage = () => {
                     )
                   }
                 />
+              </td>
+              <td className="text-center">
+                <Button
+                  variant="danger"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Are you sure you want to delete this key?"
+                      )
+                    ) {
+                      if (schema.id) handleDelete(schema.id);
+                      else {
+                        const updatedSchemas = [...schemas];
+                        updatedSchemas.splice(index, 1);
+                        setSchemas(updatedSchemas);
+                      }
+                    }
+                  }}
+                >
+                  <FaTrash />
+                </Button>
               </td>
             </tr>
           ))}

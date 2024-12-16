@@ -129,10 +129,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/createschema",
+        path: "/UpdateSchema",
         element: (
           <RequireAuth allowedRoles={["admin"]}>
-            <CreateSchema />
+            <UpdateSchemas />
           </RequireAuth>
         ),
       },

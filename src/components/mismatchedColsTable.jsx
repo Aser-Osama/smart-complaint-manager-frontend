@@ -1,7 +1,7 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
 
-const MismatchedColumnsTable = ({ mismatchedCols }) => {
+const MismatchedColumnsTable = ({ mismatchedCols, effectiveDate }) => {
   const formatColumnName = (key) => {
     if (!key || typeof key !== "string") {
       return "";
@@ -88,7 +88,17 @@ const MismatchedColumnsTable = ({ mismatchedCols }) => {
               {nonFinancialMismatches.map((col, index) => (
                 <tr key={index}>
                   <td>{formatColumnName(col.key)}</td>
-                  <td>{col.receipt_value ?? "N/A"}</td>
+                  <td>
+                    {col.key === "payment_due_date"
+                      ? `${col.receipt_value} ` +
+                        "(" +
+                        (new Date(col.receipt_value) -
+                          new Date(effectiveDate)) /
+                          (1000 * 60 * 60 * 24) +
+                        " days" +
+                        ")"
+                      : col.receipt_value ?? "N/A"}
+                  </td>
                   <td>{col.contract_value ?? "N/A"}</td>
                 </tr>
               ))}

@@ -14,6 +14,7 @@ import {
   ToastContainer,
   ToggleButton,
   ToggleButtonGroup,
+  Spinner,
 } from "react-bootstrap";
 import ReceiptTable from "../ReceiptsTable.jsx";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate.js";
@@ -26,7 +27,6 @@ const ViewContract = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState(null);
-  const [showToast, setShowToast] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [showContractData, setShowContractData] = useState(false);
   const [contractData, setContractData] = useState(null);
@@ -37,6 +37,8 @@ const ViewContract = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [mismatchOnly, setMismatchOnly] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [contract_name, setContractName] = useState(null);
   // Get the URL parameters and validate them
   const params = useParams();
@@ -88,6 +90,9 @@ const ViewContract = () => {
     for (let i = 0; i < selectedFiles.length; i++) {
       formData.append("files", selectedFiles[i]);
     }
+    setShowModal(false);
+
+    setIsLoading(true); // Set loading to true before starting the upload
 
     try {
       const response = await AxiosPrivate.post(
@@ -99,9 +104,7 @@ const ViewContract = () => {
           },
         }
       );
-      if (response.status === 202) {
-        setShowToast(true); // Show the toast notification
-      } else {
+      if (response.status !== 200) {
         console.error("Error uploading files:", response.data.message);
         setShowErrorToast(true);
       }
@@ -109,6 +112,8 @@ const ViewContract = () => {
       console.error("Error uploading files:", error.message);
       setShowErrorToast(true);
     } finally {
+      setIsLoading(false); // Set loading to false after the upload is complete
+      fetchReceipts(); // Fetch the receipts after the upload is complete
       setShowModal(false);
     }
   };
@@ -170,6 +175,16 @@ const ViewContract = () => {
   return (
     (receipts && (
       <Container className="m-5" fluid={true}>
+        {isLoading && (
+          <Modal show={true} centered>
+            <Modal.Body>
+              <div className="text-center">
+                <Spinner animation="border" role="status"></Spinner>
+                <p>Uploading files, please wait...</p>
+              </div>
+            </Modal.Body>
+          </Modal>
+        )}
         <Row className="align-items-center mb-3">
           <Col xxl="8">
             <Row className="align-items-center">
@@ -206,25 +221,6 @@ const ViewContract = () => {
           </Col>
         </Row>
         <Row>
-          <ToastContainer position="top-end" className="p-3">
-            <Toast
-              onClose={() => setShowToast(false)}
-              show={showToast}
-              delay={10000}
-              autohide
-            >
-              <Toast.Header>
-                <strong className="me-auto">File Uploading</strong>
-              </Toast.Header>
-              <Toast.Body>
-                <h6>Files received and processing has started.</h6>
-                <p>
-                  Refreshing using the refrsh button in a few seconds is
-                  recommended.
-                </p>
-              </Toast.Body>
-            </Toast>
-          </ToastContainer>
           <ToastContainer position="top-end" className="p-3">
             <Toast
               onClose={() => setShowErrorToast(false)}
@@ -384,25 +380,18 @@ const ViewContract = () => {
     )) ||
     (error && (
       <Container>
-        <ToastContainer position="top-end" className="p-3">
-          <Toast
-            onClose={() => setShowToast(false)}
-            show={showToast}
-            delay={10000}
-            autohide
-          >
-            <Toast.Header>
-              <strong className="me-auto">File Uploading</strong>
-            </Toast.Header>
-            <Toast.Body>
-              <h6>Files received and processing has started.</h6>
-              <p>
-                Refreshing using the refrsh button in a few seconds is
-                recommended.
-              </p>
-            </Toast.Body>
-          </Toast>
-        </ToastContainer>
+        {isLoading && (
+          <Modal show={true} centered>
+            <Modal.Body>
+              <div className="text-center">
+                <Spinner animation="border" role="status">
+                  <span className="sr-only">Loading...</span>
+                </Spinner>
+                <p>Uploading files, please wait...</p>
+              </div>
+            </Modal.Body>
+          </Modal>
+        )}
         <ToastContainer position="top-end" className="p-3">
           <Toast
             onClose={() => setShowErrorToast(false)}

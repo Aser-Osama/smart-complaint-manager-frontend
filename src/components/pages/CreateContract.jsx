@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Form, Button, Alert, Row, Col } from "react-bootstrap";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import useAuth from "../../hooks/useAuth";
@@ -18,7 +18,7 @@ const CreateContract = () => {
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
   const [contractCreatedId, setContractCreatedId] = useState(null);
-
+  const fileInputRef = useRef(null);
   const formatName = (key) => {
     return key
       .replace(/_/g, " ")
@@ -43,6 +43,9 @@ const CreateContract = () => {
 
   const clearFields = () => {
     setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     setUploader(auth.id);
     setContractType("");
     setContractName("");
@@ -156,7 +159,11 @@ const CreateContract = () => {
       </Form.Group>
       <Form.Group controlId="fileUpload">
         <Form.Label className="mb-0 mt-3">Upload Contract File</Form.Label>
-        <Form.Control type="file" onChange={handleFileChange} value="" />
+        <Form.Control
+          ref={fileInputRef}
+          type="file"
+          onChange={handleFileChange}
+        />
       </Form.Group>
       <Form.Group controlId="ContractName">
         <Form.Label className="mb-0 mt-3">Contract name</Form.Label>
@@ -195,7 +202,11 @@ const CreateContract = () => {
                 }
                 step={field.value_type === "number" ? "any" : ""}
                 name={field.key_name}
-                placeholder={`Enter ${field.key_name}`}
+                placeholder={`Enter ${field.key_name}${
+                  field.key_name === "payment_due_date"
+                    ? "; ##d, ##m, and ##y for days, months, and years accordingly, ex: 15d"
+                    : ""
+                }`}
                 required={field.required}
                 onChange={handleInputChange}
               />

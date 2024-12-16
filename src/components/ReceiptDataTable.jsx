@@ -159,14 +159,11 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
                       }
                       step={rowData.value_type === "number" ? "any" : ""}
                       value={
-                        rowData.value_type === "date" ||
-                        col.key === "payment_due_date"
-                          ? rowData.value
-                            ? new Date(rowData.value)
-                                .toISOString()
-                                .split("T")[0]
-                            : ""
-                          : rowData.value
+                        (rowData.value_type === "date" ||
+                          col.key === "payment_due_date") &&
+                        rowData.value
+                          ? new Date(rowData.value).toLocaleDateString("en-CA")
+                          : rowData.value || ""
                       }
                       onChange={(e) =>
                         handleChange(col.key, "value", e.target.value)
@@ -182,6 +179,7 @@ function EditableReceiptTable({ receipt, schema, isEditing, onEdit, onSave }) {
                     rowData.value
                   )}
                 </td>
+
                 {rowData.value_type === "number" && (
                   <>
                     <td style={getCellStyle(rowData.quantity)}>

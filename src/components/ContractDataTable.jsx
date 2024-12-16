@@ -97,29 +97,23 @@ function EditableContractTable({ receipt, schema, isEditing, onEdit, onSave }) {
                   {isEditing ? (
                     <input
                       type={
-                        rowData.value_type === "number"
+                        col.value_type === "number"
                           ? "number"
-                          : rowData.value_type === "date" ||
-                            col.key === "payment_due_date"
+                          : col.value_type === "date"
                           ? "date"
                           : "text"
                       }
-                      step={rowData.value_type === "number" ? "any" : ""}
+                      step={col.value_type === "number" ? "any" : ""}
                       value={
-                        rowData.value_type === "date" ||
-                        col.key === "payment_due_date"
-                          ? rowData.value
-                            ? new Date(rowData.value)
-                                .toISOString()
-                                .split("T")[0]
-                            : ""
-                          : rowData.value
+                        col.value_type === "date" && rowData.value
+                          ? new Date(rowData.value).toLocaleDateString("en-CA")
+                          : rowData.value || ""
                       }
                       onChange={(e) =>
                         handleChange(col.key, "value", e.target.value)
                       }
                     />
-                  ) : rowData.value_type === "date" ? (
+                  ) : col.value_type === "date" ? (
                     rowData.value ? (
                       new Date(rowData.value).toLocaleDateString("en-US")
                     ) : (

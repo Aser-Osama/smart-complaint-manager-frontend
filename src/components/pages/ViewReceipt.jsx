@@ -7,10 +7,10 @@ import MismatchedColumnsTable from "../mismatchedColsTable";
 
 const ViewReceipt = () => {
   const [schema, setSchema] = useState([]);
+  const [effectiveDate, setEffectiveDate] = useState(null);
   const [receipt, setReceipt] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [contractId, setContractId] = useState(null);
-  const [contract, setContract] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [error, setError] = useState(null);
   const [editNotice, setEditNotice] = useState(null);
@@ -18,12 +18,6 @@ const ViewReceipt = () => {
   const [mismatchedCols, setMismatchedCols] = useState([]);
   const params = useParams();
   const AxiosPrivate = useAxiosPrivate();
-
-  //Update Use Effect
-  useEffect(() => {
-    // This effect will run whenever mismatchedCols changes
-    console.log("mismatchedCols updated:", mismatchedCols);
-  }, [mismatchedCols]);
 
   // Mount Use Effect
   useEffect(() => {
@@ -44,15 +38,6 @@ const ViewReceipt = () => {
         const contractResponse = (
           await AxiosPrivate.get(`/contract/id/${receiptResponse.contract_id}`)
         ).data;
-
-        const transformedContractData = contractResponse.data.reduce(
-          (acc, data) => {
-            acc[data.key] = data.value;
-            return acc;
-          },
-          {}
-        );
-        setContract(transformedContractData);
 
         const schemaResponse = (
           await AxiosPrivate.get(`/receipt/schema/${params.id}`)
@@ -83,8 +68,10 @@ const ViewReceipt = () => {
     };
 
     fetchSchemaAndReceipt();
+    fetchEffectiveDate();
     fetchPdf();
   }, [params.id]);
+
   const fetchMismatch = async () => {
     try {
       const response = await AxiosPrivate.post(`/receipt/getmismatchedcols`, {
@@ -100,6 +87,19 @@ const ViewReceipt = () => {
       console.error(error);
     }
   };
+
+  const fetchEffectiveDate = async () => {
+    try {
+      const id = params.id;
+      const effective_date = await AxiosPrivate.get(
+        `receipt/geteffectivedate/${id}`
+      );
+      setEffectiveDate(effective_date.data.effective_date);
+    } catch (error) {
+      console.error("Error fetching effective date:", error);
+    }
+  };
+
   const handleSave = async (updatedData) => {
     try {
       console.log("Saving data:", updatedData);
@@ -112,6 +112,7 @@ const ViewReceipt = () => {
       await fetchMismatch();
       setIsEditing(false);
       setEditNotice(null);
+      fetchEffectiveDate();
       setValidationErrors(null);
     } catch (error) {
       console.error("Error saving data:", error.response.data.errors);
@@ -186,7 +187,10 @@ const ViewReceipt = () => {
           <hr />
           <Row>
             <Col>
-              <MismatchedColumnsTable mismatchedCols={mismatchedCols} />
+              <MismatchedColumnsTable
+                mismatchedCols={mismatchedCols}
+                effectiveDate={effectiveDate}
+              />
             </Col>
           </Row>
           <Row>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./AuditReportPage.css"; // Add custom styles
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -11,6 +11,7 @@ const AuditReportPageByContract = () => {
   const [contract, setContract] = useState({});
   const params = useParams();
   const AxiosPrivate = useAxiosPrivate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMismatch = async () => {
@@ -321,6 +322,11 @@ const AuditReportPageByContract = () => {
     <div className="audit-report">
       <h1 className="report-title">Audit Report for Contract {params.id}</h1>
       <Row>
+        <Col>
+          <Button onClick={() => navigate(-1)} className="back-button">
+            Back to Contract {params.id}
+          </Button>
+        </Col>
         <Col className="ms-auto text-end">
           <Button onClick={generatePDF} className="download-button">
             Download Report
