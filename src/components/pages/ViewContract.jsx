@@ -384,9 +384,7 @@ const ViewContract = () => {
           <Modal show={true} centered>
             <Modal.Body>
               <div className="text-center">
-                <Spinner animation="border" role="status">
-                  <span className="sr-only">Loading...</span>
-                </Spinner>
+                <Spinner animation="border" role="status"></Spinner>
                 <p>Uploading files, please wait...</p>
               </div>
             </Modal.Body>
