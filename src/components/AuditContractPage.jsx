@@ -103,7 +103,7 @@ const AuditReportPageByContract = () => {
       doc.text("provar", 105, 28, { align: "center" });
 
       doc.setFontSize(32);
-      doc.text("Contract Audit Results", 105, 40, { align: "center" });
+      doc.text("Audit Results", 105, 40, { align: "center" });
 
       doc.setFont("arial", "normal");
       doc.setFontSize(12);
