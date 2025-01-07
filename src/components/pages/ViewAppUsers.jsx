@@ -19,6 +19,7 @@ const ViewAppUser = () => {
   const [token, setToken] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [showConfirmRevoke, setShowConfirmRevoke] = useState(false);
+  const [showConfirmRevokeGUID, setShowConfirmRevokeGUID] = useState(false);
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -35,10 +36,28 @@ const ViewAppUser = () => {
       )
     );
   };
+  const revokeGUID = (userId) => {
+    axiosPrivate.put(`/appusers/revoke-guid/${selectedUserId}`);
+
+    setUsers(
+      users.map((user) =>
+        user.id === userId ? { ...user, win_guid: null } : user
+      )
+    );
+  };
+
   const handleRevokeConfirm = () => {
     if (selectedUserId) {
       revokeToken(selectedUserId);
       setShowConfirmRevoke(false);
+      setSelectedUserId(null);
+    }
+  };
+
+  const handleRevokeGUIDConfirm = () => {
+    if (selectedUserId) {
+      revokeGUID(selectedUserId);
+      setShowConfirmRevokeGUID(false);
       setSelectedUserId(null);
     }
   };
@@ -73,6 +92,22 @@ const ViewAppUser = () => {
     GetAllUsers();
   }, []);
 
+  const WrapText = ({ text, limit = 5 }) => {
+    if (!text) return "No Token";
+    return (
+      <div
+        style={{
+          maxWidth: '100px',
+          wordBreak: text.length > limit ? 'break-word' : 'normal',
+          whiteSpace: text.length > limit ? 'normal' : 'nowrap'
+        }}
+        title={text}
+      >
+        {text}
+      </div>
+    );
+  };
+
   return (
     <Container className="mt-5">
       <h1>User Management</h1>
@@ -85,6 +120,7 @@ const ViewAppUser = () => {
             <th>Company</th>
             <th>Name</th>
             <th>User Token</th>
+            <th>GUID</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -96,7 +132,9 @@ const ViewAppUser = () => {
               <td>{user.username}</td>
               <td>{user.company}</td>
               <td>{user.name}</td>
-              <td>{user.usertoken || "No Token"}</td>
+
+              <td>{user.usertoken ? <WrapText text={user.usertoken} /> : "No Token"}</td>
+              <td>{user.win_guid ? <WrapText text={user.win_guid} /> : "No GUID"}</td>
               <td>
                 <Button
                   variant="warning"
@@ -110,6 +148,7 @@ const ViewAppUser = () => {
                 </Button>
                 <Button
                   variant="danger"
+                  className="me-2"
                   onClick={() => {
                     setSelectedUserId(user.id);
                     setShowConfirmRevoke(true);
@@ -117,6 +156,15 @@ const ViewAppUser = () => {
                   disabled={!user.usertoken}
                 >
                   Revoke Token
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => {
+                    setSelectedUserId(user.id);
+                    setShowConfirmRevokeGUID(true);
+                  }}
+                >
+                  Remove GUID
                 </Button>
               </td>
             </tr>
@@ -195,6 +243,29 @@ const ViewAppUser = () => {
             </Button>
             <Button variant="danger" onClick={handleRevokeConfirm}>
               Revoke Token
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          show={showConfirmRevokeGUID}
+          onHide={() => setShowConfirmRevokeGUID(false)}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm GUID Removal</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to remove this user's guid?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowConfirmRevokeGUID(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleRevokeGUIDConfirm}>
+              Remove GUID
             </Button>
           </Modal.Footer>
         </Modal>

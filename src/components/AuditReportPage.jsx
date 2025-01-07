@@ -5,7 +5,7 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button, Col, Row } from "react-bootstrap";
-
+import { arial, arial_bold } from "../../public/fonts.js"
 const AuditReportPage = () => {
   const [mismatchedCols, setMismatchedCols] = useState([]);
   const [invoiceNumber, setInvoiceNumber] = useState("");
@@ -78,37 +78,96 @@ const AuditReportPage = () => {
       unit: "mm",
       format: "a4",
     });
+    doc.setTextColor(0, 0, 128); // Blue color
+
+    doc.addFileToVFS("arial.ttf", arial);
+    doc.addFont("arial.ttf", "arial", "normal");
+    doc.addFileToVFS("arial-bold.ttf", arial_bold);
+    doc.addFont("arial-bold.ttf", "arial", "bold");
+
+    // Add Header
+    const addHeader = () => {
+      doc.setFont("arial", "bold");
+      doc.setFontSize(32);
+      doc.text("provar", 105, 28, { align: "center" });
+      doc.setFontSize(32);
+      doc.text("Invoice Audit Results", 105, 40, { align: "center" });
+
+
+      doc.setFont("arial", "normal");
+      doc.setFontSize(12);
+      doc.text("provar.io", 10, 10, { align: "left" });
+      doc.text("fouroneone.io", 200, 10, { align: "right" });
+
+      doc.text(`Invoice Number: ${params.id}`, 10, 57, { align: "left" });
+      doc.text(`Date Generated: ${new Date().toLocaleDateString()}`, 10, 62, { align: "left" })
+      doc.setLineWidth(0.4);
+      doc.setDrawColor(0, 0, 128);
+      doc.line(10, 70, 200, 70);
+
+    };
+
+    // Footer Function
+    const addFooter = (doc) => {
+      const pageHeight = doc.internal.pageSize.height; // A4 height
+      const marginBottom = 10;
+
+      // Footer Text 1 (Top Line)
+      doc.setFontSize(10);
+      doc.text("Provar by FourOneOne, LLC", 105, pageHeight - marginBottom - 5, { align: "center" });
+
+      // Footer Text 2 (Bottom Line)
+      doc.setFontSize(10);
+      doc.text("provar.io | fouroneone.io", 105, pageHeight - marginBottom, { align: "center" });
+    };
+
+    // Total Overpaid Summary
+    const addTotalOverpaidSummary = (doc, totalText) => {
+      const pageHeight = doc.internal.pageSize.height; // A4 height
+      const marginBottom = 20; // Margin to ensure space above the footer
+      const summaryPositionY = doc.lastAutoTable.finalY + 15;
+
+      // Check if the summary text overlaps with the footer
+      if (summaryPositionY + 10 > pageHeight - marginBottom) {
+        doc.addPage(); // Add a new page if there's not enough space
+        doc.setFontSize(14);
+        doc.text(totalText, 105, 20, { align: "center" }); // Position it at the top of the new page
+        addFooter(doc); // Add footer to the new page
+      } else {
+        doc.setFontSize(14);
+        doc.text(totalText, 105, summaryPositionY, { align: "center" }); // Position it below the table
+      }
+    };
+
+    // Draw Header and Footer
+    addHeader();
 
     // Title
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text(`Audit Report for invoice ${params.id}`, 105, 20, {
-      align: "center",
-    });
-    doc.setFontSize(16);
-    doc.text(`Invoice Number: ${invoiceNumber}`, 105, 25, { align: "center" });
+    doc.setFont("arial", "bold");
 
-    // Table Styles (No Colors)
+    doc.setFontSize(16);
+
+    // Table Styles (now with the same text color approach from func1)
     const tableOptions = {
       margin: { top: 30 },
       theme: "plain", // No grid or color themes
       styles: {
-        font: "helvetica",
+        font: "arial",           // changed to match func1
         fontSize: 10,
         lineWidth: 0.1,
-        textColor: [0, 0, 0], // Black text
+        textColor: [0, 0, 128],         // blue text
         overflow: "linebreak",
         cellPadding: 4,
       },
       headStyles: {
-        fillColor: [255, 255, 255], // White background for the header
-        textColor: [0, 0, 0], // Black text
+        fillColor: [255, 255, 255],     // White background
+        textColor: [0, 0, 128],         // blue text
         fontStyle: "bold",
         fontSize: 11,
         halign: "center",
       },
       bodyStyles: {
-        textColor: [0, 0, 0], // Black text
+        textColor: [0, 0, 128],         // blue text
         halign: "center",
         valign: "middle",
       },
@@ -116,7 +175,7 @@ const AuditReportPage = () => {
 
     // Invoice Inconsistencies Table
     doc.setFontSize(14);
-    doc.text("Invoice Inconsistencies", 105, 35, { align: "center" });
+    doc.text("Invoice Inconsistencies", 105, 80, { align: "center" });
 
     const inconsistencyRows = filteredWithoutQuantity.map((col) => [
       formatColumnName(col.key),
@@ -127,13 +186,17 @@ const AuditReportPage = () => {
 
     doc.autoTable({
       ...tableOptions,
-      startY: 40,
+      startY: 85,
       styles: {
         lineWidth: 0, // No borders
         cellPadding: { top: 0, left: 5, bottom: 2, right: 5 },
-        font: "helvetica",
+        font: "arial",
         fontSize: 10,
-        textColor: [0, 0, 0],
+        textColor: [0, 0, 128],
+      },
+      didDrawPage: () => {
+        // Add footer after each page is drawn
+        addFooter(doc);
       },
       head: [],
       body: inconsistencyRows.flatMap((row) =>
@@ -142,24 +205,24 @@ const AuditReportPage = () => {
             {
               content: `-${row[0]}`,
               colSpan: 4,
-              styles: { fontStyle: "bold", halign: "left" },
+              styles: { fontStyle: "bold", halign: "left", textColor: [0, 0, 128] },
             },
           ],
           [
             {
               content: `- Contract Value: ${row[2]}, Invoice Value: ${row[1]}`,
               colSpan: 4,
-              styles: { halign: "left" },
+              styles: { halign: "left", textColor: [0, 0, 128] },
             },
           ],
           row[3]
             ? [
-                {
-                  content: `- Notes: ${row[3]}`,
-                  colSpan: 4,
-                  styles: { halign: "left" },
-                },
-              ]
+              {
+                content: `- Notes: ${row[3]}`,
+                colSpan: 4,
+                styles: { halign: "left", textColor: [0, 0, 128] },
+              },
+            ]
             : null,
         ].filter(Boolean)
       ),
@@ -180,8 +243,7 @@ const AuditReportPage = () => {
     ]);
 
     doc.autoTable({
-      ...tableOptions,
-      startY: doc.lastAutoTable.finalY + 15,
+      startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 40,
       head: [
         [
           "Charge Type",
@@ -193,21 +255,37 @@ const AuditReportPage = () => {
         ],
       ],
       body: overchargeRows,
+      styles: {
+        font: "arial",
+        fontSize: 10,
+        textColor: [0, 0, 128],
+      },
+      headStyles: {
+        fillColor: [230, 230, 250],
+        textColor: [0, 0, 128],
+        fontStyle: "bold",
+        halign: "center",
+      },
+      bodyStyles: {
+        textColor: [0, 0, 128],
+        halign: "center",
+        valign: "middle",
+      },
+      didDrawPage: () => {
+        addFooter(doc);
+      },
     });
 
-    // Total Overpaid Summary
-    doc.setFontSize(14);
-    doc.text(
-      `Total Overpaid: $${calculateTotalOverpay().toFixed(2)}`,
-      105,
-      doc.lastAutoTable.finalY + 15,
-      { align: "center" }
+
+
+    addTotalOverpaidSummary(
+      doc,
+      `Total Overpaid: $${calculateTotalOverpay().toFixed(2)}`
     );
 
     // Save with a Proper Filename
-    const filename = `Audit_Report_${
-      new Date().toISOString().split("T")[0]
-    }.pdf`;
+    const filename = `Audit_Report_${new Date().toISOString().split("T")[0]
+      }.pdf`;
     doc.save(filename);
   };
   return (

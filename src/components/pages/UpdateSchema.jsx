@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Table, Button, Form, Alert } from "react-bootstrap";
-import axios from "axios";
-import { axiosPrivate } from "../../api/axios";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import { FaTrash } from "react-icons/fa";
-import { GiJamesBondAperture } from "react-icons/gi";
 
 const UpdateSchemasPage = () => {
+  const axiosPrivate = useAxiosPrivate();
+
   const [schemas, setSchemas] = useState([]);
   const [contractTypes, setContractTypes] = useState([]);
   const [contractType, setContractType] = useState("");
@@ -88,7 +88,7 @@ const UpdateSchemasPage = () => {
     } catch (err) {
       setError(
         err.response?.data?.error ||
-          "Failed to update schemas. Please try again."
+        "Failed to update schemas. Please try again."
       );
       setSuccess(null);
     }
@@ -98,7 +98,7 @@ const UpdateSchemasPage = () => {
     // Mark the schema for deletion
     setSchemasToDelete((prev) => [...prev, id]);
     alert(
-      "Deletion will be confirmed when you save changes, you can refersh the page to revert your actions."
+      "Deletion will be confirmed when you save changes, you can refresh the page to revert your actions."
     );
     // Optionally, remove it from the displayed list
     setSchemas(schemas.filter((schema) => schema.id !== id));
@@ -106,7 +106,7 @@ const UpdateSchemasPage = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Update Schemas</h2>
+      <h2>Update Contract Fields</h2>
 
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
@@ -145,8 +145,8 @@ const UpdateSchemasPage = () => {
             <th>Key Name</th>
             <th>Value Type</th>
             <th>Required</th>
-            <th>Receipt Valid if _ Contract</th>
-            <th>Reviewed In Receipt</th>
+            <th>Invoice Valid if _ Contract</th>
+            <th>Reviewed In Invoice</th>
             <th>Aliases</th>
             <th> Delete </th>
           </tr>

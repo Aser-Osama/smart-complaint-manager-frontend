@@ -136,7 +136,13 @@ function ReceiptTable({ receipts, pageNum, pageSize }) {
                       onClick={() =>
                         handleShowMismatch({
                           id: receipt.id,
-                          data: receipt?.mismatched_columns?.col?.join(", "),
+                          data: receipt?.mismatched_columns?.col
+                            ?.map(col => col
+                              .split('_')
+                              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                              .join(' ')
+                            )
+                            ?.join(", "),
                         })
                       }
                     >
@@ -155,7 +161,7 @@ function ReceiptTable({ receipts, pageNum, pageSize }) {
               </td>
               <td>
                 <NavLink
-                  to={`/receipt/download/${receipt.id}`}
+                  to={`/invoice/download/${receipt.id}`}
                   className="text-decoration-none"
                   target="_blank"
                   rel="noopener noreferrer"

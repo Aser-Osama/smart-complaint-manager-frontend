@@ -124,8 +124,7 @@ const ViewContract = () => {
       // Fetch the schema
       const receiptsResponse = (
         await AxiosPrivate.get(
-          `/receipt/contractid/${
-            Number(params.id) ?? 0
+          `/receipt/contractid/${Number(params.id) ?? 0
           }?page=${pageNumber}&pageSize=${pageSize}&mismatchOnly=${mismatchOnly}`
         )
       ).data;
@@ -180,7 +179,7 @@ const ViewContract = () => {
             <Modal.Body>
               <div className="text-center">
                 <Spinner animation="border" role="status"></Spinner>
-                <p>Uploading files, please wait...</p>
+                <p>Uploading and analyzing files, please wait...</p>
               </div>
             </Modal.Body>
           </Modal>
@@ -385,7 +384,7 @@ const ViewContract = () => {
             <Modal.Body>
               <div className="text-center">
                 <Spinner animation="border" role="status"></Spinner>
-                <p>Uploading files, please wait...</p>
+                <p>Uploading and analyzing files, please wait...</p>
               </div>
             </Modal.Body>
           </Modal>

@@ -19,7 +19,8 @@ function DownloadPage({ downloadType }) {
           const url = URL.createObjectURL(response.data);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `${downloadType}_${params.id}.pdf`;
+          const filename = downloadType === "contract" ? "contract" : "invoice";
+          link.download = `${filename}_${params.id}.pdf`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);

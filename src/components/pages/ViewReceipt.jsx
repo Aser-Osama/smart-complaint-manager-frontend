@@ -228,7 +228,7 @@ const ViewReceipt = () => {
               </Row>
               <Row className="text-end pt-1">
                 <Col>
-                  <a href={pdfUrl} download={`contract_${params.id}.pdf`}>
+                  <a href={pdfUrl} download={`invoice_${params.id}.pdf`}>
                     Download PDF
                   </a>
                 </Col>

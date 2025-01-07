@@ -65,31 +65,39 @@ const NavBar = () => {
               ))}
             </NavDropdown>
           </Nav>
-          <Nav>
-            <NavDropdown title="Admin Options" id="basic-nav-dropdown">
-              <NavDropdown.Item as={NavLink} to="/createuser">
-                Create User
-              </NavDropdown.Item>
-              <NavDropdown.Item as={NavLink} to="/createschema">
-                Create Schema
-              </NavDropdown.Item>
-              <NavDropdown.Item as={NavLink} to="/updateschema">
-                Update Schema
-              </NavDropdown.Item>
-              <NavDropdown.Item as={NavLink} to="/createappuser">
-                Create App User
-              </NavDropdown.Item>
-              <NavDropdown.Item as={NavLink} to="/viewappusers">
-                View App Users
-              </NavDropdown.Item>
-              <NavDropdown.Item as={NavLink} to="/viewappimages">
-                View App Images
-              </NavDropdown.Item>
-            </NavDropdown>
-            <Nav.Link as={NavLink} to="/logout">
-              Logout
-            </Nav.Link>
-          </Nav>
+          {auth.role === "admin" ? (
+            <Nav>
+              <NavDropdown title="Admin Options" id="basic-nav-dropdown">
+                <NavDropdown.Item as={NavLink} to="/modifycontractfields">
+                  Modify Contract Fields
+                </NavDropdown.Item>
+                <NavDropdown.Item as={NavLink} to="/createuser">
+                  Create User
+                </NavDropdown.Item>
+                <NavDropdown.Item as={NavLink} to="/updateuser">
+                  View Users
+                </NavDropdown.Item>
+                <NavDropdown.Item as={NavLink} to="/createappuser">
+                  Create App User
+                </NavDropdown.Item>
+                <NavDropdown.Item as={NavLink} to="/viewappusers">
+                  View App Users
+                </NavDropdown.Item>
+                <NavDropdown.Item as={NavLink} to="/viewappimages">
+                  View App Images
+                </NavDropdown.Item>
+              </NavDropdown>
+              <Nav.Link as={NavLink} to="/logout">
+                Logout
+              </Nav.Link>
+            </Nav>)
+            : (
+              <Nav>
+                <Nav.Link as={NavLink} to="/logout">
+                  Logout
+                </Nav.Link>
+              </Nav>
+            )}
         </Navbar.Collapse>
       </Container>
     </Navbar>

@@ -21,6 +21,7 @@ import CreateSchema from "./components/pages/CreateSchema.jsx";
 import AuditReportPage from "./components/AuditReportPage.jsx";
 import AuditContractPage from "./components/AuditContractPage.jsx";
 import UpdateSchemas from "./components/pages/UpdateSchema.jsx";
+import UpdateUser from "./components/pages/UpdateUsers.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -89,7 +90,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/receipt/download/:id",
+        path: "/invoice/download/:id",
         element: (
           <RequireAuth>
             <DownloadPage downloadType="receipt" />
@@ -121,6 +122,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "/updateuser",
+        element: (
+          <RequireAuth allowedRoles={["admin"]}>
+            <UpdateUser />
+          </RequireAuth>
+        ),
+      },
+      {
         path: "/createappuser",
         element: (
           <RequireAuth allowedRoles={["admin"]}>
@@ -129,15 +138,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/UpdateSchema",
-        element: (
-          <RequireAuth allowedRoles={["admin"]}>
-            <UpdateSchemas />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: "/UpdateSchema",
+        path: "/modifycontractfields",
         element: (
           <RequireAuth allowedRoles={["admin"]}>
             <UpdateSchemas />
