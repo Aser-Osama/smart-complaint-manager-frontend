@@ -120,7 +120,7 @@ const UpdateSchemasPage = () => {
           >
             {contractTypes.map((type) => (
               <option key={type} value={type}>
-                {type}
+                {type === "freight" ? "Ocean Freight" : type === "truck" ? "Trucking" : String(type).charAt(0).toUpperCase() + String(type).slice(1)}
               </option>
             ))}
           </Form.Select>
