@@ -100,11 +100,13 @@ const ImageGallery = () => {
 
   // Fields to search on
   const fieldsToSearch = [
-    "uploader_user.email",
+    "uploader_user.company_email_address",
     "uploader_user.username",
-    "uploader_user.company",
-    "uploader_user.name",
+    "uploader_user.company_name",
+    "uploader_user.first_name",
+    "uploader_user.last_name",
     "image_date_taken",
+    "image_sn",
   ];
 
   // Filter images based on the search term

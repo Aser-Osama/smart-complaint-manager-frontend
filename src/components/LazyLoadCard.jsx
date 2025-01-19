@@ -83,13 +83,13 @@ const LazyLoadCard = ({ image, handleCardClick }) => {
           {new Date(image.image_date_taken).toLocaleDateString()}
         </Card.Text>
         <Card.Text>
-          <strong>Uploader:</strong> {image.uploader_user.name}
+          <strong>Uploader:</strong> {`${image.uploader_user.first_name} ${image.uploader_user.last_name}`}
         </Card.Text>
         <Card.Text>
-          <strong>Email:</strong> {image.uploader_user.email}
+          <strong>Email:</strong> {image.uploader_user.company_email_address}
         </Card.Text>
         <Card.Text>
-          <strong>Company:</strong> {image.uploader_user.company}
+          <strong>Company:</strong> {image.uploader_user.company_name}
         </Card.Text>
         <Card.Text>
           <strong>Username:</strong> {image.uploader_user.username}
