@@ -33,6 +33,10 @@ const router = createBrowserRouter([
         element: <Login />,
       },
       {
+        path: "app-register",
+        element: <CreateAppUser />,
+      },
+      {
         path: "unauthorized",
         element: <Unauthorized />,
       },
