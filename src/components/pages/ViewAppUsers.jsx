@@ -57,7 +57,16 @@ const ViewAppUser = () => {
     axiosPrivate.post(`/appusers/confirm-registration/${userId}`); // Use the passed userId
     setUsers(
       users.map((user) =>
-        user.id === userId ? { ...user, registrationConfirmed: true } : user
+        user.id === userId ? { ...user, registrationConfirmed: 1 } : user
+      )
+    );
+  };
+
+  const rejectUser = (userId) => {
+    axiosPrivate.post(`/appusers/reject-registration/${userId}`); // Use the passed userId
+    setUsers(
+      users.map((user) =>
+        user.id === userId ? { ...user, registrationConfirmed: 2 } : user
       )
     );
   };
@@ -134,7 +143,7 @@ const ViewAppUser = () => {
             <th>Subscription Type</th>
             <th>User Token</th>
             <th>GUID</th>
-            <th>Reg Confirmed</th>
+            <th>Registration</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -153,18 +162,31 @@ const ViewAppUser = () => {
               <td>{user.win_guid ? <WrapText text={user.win_guid} /> : "No GUID"}</td>
               <td>
                 {user.registrationConfirmed ? (
-                  "Confirmed"
+                  user.registrationConfirmed === 1 ? "Confirmed" : "Rejected"
                 ) : (
-                  <a
-                    href="#"
-                    onClick={() => {
-                      confirmUser(user.id); // Pass user.id directly to the function
-                    }}
-                  >
-                    No, Confirm Registration
-                  </a>
+                  <>
+                    <a
+                      href="#"
+                      onClick={() => {
+                        confirmUser(user.id); // Pass user.id directly to the function
+                      }}
+                    >
+                      Confirm
+                    </a>
+                    <span> | </span>
+                    <a
+                      href="#"
+                      onClick={() => {
+                        rejectUser(user.id); // Pass user.id directly to the function
+                      }}
+                    >
+                      Reject
+                    </a>
+                  </>
                 )}
               </td>
+
+
 
               <td>
                 <Button
